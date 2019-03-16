@@ -26,7 +26,7 @@ function exper = createExperiment(experName, templateName, worldN, overlap)
     % keep only one world with the arena floor
     exper.worlds= []; 
     for i=1:length(worlds)
-        if string(worlds{1,i}.name) == 'ArenaFloor'
+        if strcmp(worlds{1,i}.name, 'ArenaFloor')
             % get a copy of the world with the floor plan
             exper.worlds{1,1} = temp.exper.worlds{1,i}.copyItem;
         end
@@ -53,11 +53,11 @@ function exper = createExperiment(experName, templateName, worldN, overlap)
     % get the floor and cue template from template file
     cue = struct(cueOrder{1},[], cueOrder{2},[]);
     for i=1:length(worlds)
-        if string(worlds{1,i}.name) == cueOrder{1}
+        if strcmp(worlds{1,i}.name, cueOrder{1})
             % get a copy of the cue template
             cue.(cueOrder{1}) = worlds{1,i}.objects{1,1}.copyItem;
         end
-        if string(worlds{i}.name) == cueOrder{2}
+        if strcmp(worlds{i}.name, cueOrder{2})
             % get a copy of the cue template
             cue.(cueOrder{2}) = worlds{1,i}.objects{1,1}.copyItem;
         end
