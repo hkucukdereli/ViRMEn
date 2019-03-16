@@ -14,8 +14,7 @@ code.termination = @terminationCodeFun;
 function vr = initializationCodeFun(vr)
 
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
-function vr = runtimeCodeFun(vr)
-    display(vr.position)
+function vr = runtimeCodeFun(vr)    
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)

@@ -1,11 +1,19 @@
-function vr = switchWorlds(vr, threshold)
+function vr = switchWorlds(vr)
     %  <vr.trialCount> needs to be initialized at the start up
     %%%
+    
+    % get the initial position for the world
     initPos = vr.worlds{vr.currentWorld}.startLocation;
-    initY = initPos(2);
-    if vr.position(2) > threshold-1 % test if the animal is at the end of the track (y > threshold)
-        vr.position(2) = initY; % set the animal’s y position to 0
-        vr.dp(:) = 0; % prevent any additional movement during teleportation
-        vr.trialCount =  vr.trialCount + 1;
+    % check which world is in use
+    currentWorld = vr.currentWorld;
+    userdata = vr.exper.worlds{1, currentWorld}.userdata;
+    endPos = userdata.posDist(end-userdata.overlap+1);
+    if vr.position(2) > endPos
+        % switch the world to the next one
+        vr.currentWorld = currentWorld + 1;
+        vr.position(2) = initY;
+        % place the animal at the begining of the overlap
+        vr.dp(:) = 0; % prevent any additional movement during fake teleportation
     end
+    
 end
