@@ -6,4 +6,3 @@ function terminationForSerial(vr)
     if exist vr.arduino_serial
         arduinoClose(vr.arduino_serial);
     end
-    
