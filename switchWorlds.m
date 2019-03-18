@@ -11,12 +11,19 @@ function vr = switchWorlds(vr)
     userdata = vr.exper.worlds{1, currentWorld}.userdata;
     endPos = userdata.posDist(end-userdata.overlap+1);
 
-    if vr.position(2) > endPos
+    if currentWorld < length(vr.exper.worlds) & vr.position(2) > endPos
         % switch the world to the next one
         vr.currentWorld = currentWorld + 1;
-        % place the animal at the begining of the overlap
-        vr.position(2) = initPos(2);
         vr.dp(:) = 0; % prevent any additional movement during fake teleportation
+    end
+    
+    % quit the experiment if the end of the arena is reached
+    if  currentWorld == length(vr.exper.worlds) & vr.position(2)
+        endPos = vr.exper.worlds{1, currentWorld}.userdata.posDist(end);
+        edgeRadius = vr.exper.worlds{1, currentWorld}.objects{1,end}.edgeRadius;
+        if endPos - edgeRadius - 2 > vr.position(2)
+            terminationCodeFun(vr);
+        end
     end
     
 end
