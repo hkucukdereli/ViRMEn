@@ -1,4 +1,4 @@
-function exper = createExperiment(experName, templateName, varargin)
+function exper = createExperiment_(experName, templateName, worldN, overlap)
 % creates a new virmen experiment with multiple worlds
 % inputs
 % experName: name of the experiment file to save the experiment data
@@ -6,19 +6,7 @@ function exper = createExperiment(experName, templateName, varargin)
 % worldN: number of worlds to be created
 % returns
 % exper: new virmen experiment 
-    
-    p = inputParser;
-    addOptional(p, 'worldN', 4, @isnumeric);
-    addOptional(p, 'overlap', 4, @isnumeric);
-    addOptional(p, 'muLength', 500, @isnumeric);
-    addOptional(p, 'sigLength', 80, @isnumeric);
-    parse(p, varargin{:});
-    p = p.Results;
 
-    % only allow even numbers for overlap to keep the cue order consistent
-    if mod(p.worldN, 2) | mod(p.overlap, 2)
-        error('overlap and worldN has to be an even number.');
-    end
     % First load the templates
     temp = load(templateName, '-mat');
     worlds = temp.exper.worlds;
@@ -41,7 +29,6 @@ function exper = createExperiment(experName, templateName, varargin)
         if strcmp(worlds{1,i}.name, 'ArenaFloor')
             % get a copy of the world with the floor plan
             exper.worlds{1,1} = temp.exper.worlds{1,i}.copyItem;
-            tempWorld = temp.exper.worlds{1,i}.copyItem;
         end
     end
     
@@ -49,20 +36,13 @@ function exper = createExperiment(experName, templateName, varargin)
     wallHeight = str2num(exper.variables.wallHeight);
     arenaL = str2num(exper.variables.arenaL);
     arenaW = str2num(exper.variables.arenaW);
-    startLocation = exper.worlds{1,1}.startLocation;
-
-    arrLength = round(arenaL / p.muLength);
-    posArr = round(normrnd(p.muLength, p.sigLength, 1, arrLength+p.worldN*(arrLength-p.overlap+1)), -1);
-    posD = cumsum(posArr);
-    posD = [0, posD];
-
-    posDist(1,:) = posD(1:arrLength);
-    c = 2;
-    n = arrLength;
-    for c=2:p.worldN
-        posDist(c,:) = posD(n+1-p.overlap : n-p.overlap+arrLength);
-        n = n-p.overlap+arrLength;
-    end
+    
+    % create the position array
+    posArr = round(normrnd(500, 80, 1, 1000),-1);
+    c = round(arenaL / median(posArr), 0) + 1;
+    posDist = cumsum(buffer(posArr, c, overlap), 1);
+    posDist = posDist(:,2:worldN+1);
+    posDist = [zeros(1, length(posDist)); posDist];
     
     % pick the cue order
     cueOrder = {['CuePlus'], ['CueCircle']};
@@ -83,41 +63,38 @@ function exper = createExperiment(experName, templateName, varargin)
         end
     end
     
+    % get on with the objects in the world
+    posFloor = arenaL / 2;
+    exper.worlds{1,1}.objects{1,1}.y = [posFloor; posFloor];
+    
+    objectCount = length(exper.worlds{1,1}.objects);
+    s = size(posDist);
     % add new worlds
-    for w=1:p.worldN
+    for w=1:worldN
         % add more worlds after the first one
         if w > 1
-            addWorld(exper, tempWorld);
-%             addWorld(exper, temp.exper.worlds{1,1}.copyItem);
+            addWorld(exper, temp.exper.worlds{1,i}.copyItem);
         end
         % rename the world
         exper.worlds{1,w}.name = sprintf('Arena_%i', w);
         % keep some important data to use later
-        exper.worlds{1,w}.userdata.posDist = posDist(w,:);
+        exper.worlds{1,w}.userdata.posDist = posDist(:,w);
         exper.worlds{1,w}.userdata.cueOrder = cueOrder;
-        exper.worlds{1,w}.userdata.overlap = p.overlap;
+        exper.worlds{1,w}.userdata.overlap = overlap;
         % adjust the world length
-        arenaL = posDist(w,end) - posDist(w,1);
-        exper.worlds{1,w}.variables.arenaL = num2str(arenaL);        
-        % set the start location
-        startLocation = startLocation + [0, posDist(w,1), 0, 0];
-        exper.worlds{1,w}.startLocation = startLocation;
+        exper.worlds{1,w}.variables.arenaL = num2str(posDist(end, w) - posDist(1, w)); 
         
-        % relocate the first object that is the floor
-        posFloor = posDist(w,1) + (posDist(w,end) - posDist(w,1)) / 2;
-        exper.worlds{1,w}.objects{1,1}.y = [posFloor; posFloor];
-        exper.worlds{1,w}.objects{1,1}.variables.arenaL = num2str(arenaL);
         % add cue objets to the new worlds
-        for ob=1:(size(posDist,2)-1)
+        for ob=1:s(1)-1
             cueInd = 2-mod(ob,2);
             addObject(exper.worlds{1,w}, cue.(cueOrder{cueInd}));
             % rename the new object
-            exper.worlds{1,w}.objects{1,end}.name = sprintf('%s_%i', cueOrder{cueInd}, ob+1);
+            exper.worlds{1,w}.objects{1,end}.name = sprintf('%s_%i', cueOrder{cueInd}, objectCount);
             % position of the cue
-            posY = posDist(w,ob) + (posDist(w,ob+1) - posDist(w,ob)) / 2;
+            posY = posDist(ob, w) + ((posDist(ob+1, w) - posDist(ob, w)) / 2);
             exper.worlds{1,w}.objects{1,end}.y = [posY; posY];
             % length of the cue
-            cueLength = posDist(w,ob+1) - posDist(w,ob);
+            cueLength = posDist(ob+1, w) - posDist(ob, w);
             exper.worlds{1,w}.objects{1,end}.width = cueLength;
             % adjust the tiling
             rows = 2;
@@ -126,19 +103,6 @@ function exper = createExperiment(experName, templateName, varargin)
         end
     end
  
-    % add an end wall to the last world
-    for j=1:length(worlds)
-        if strcmp(worlds{1,j}.name, 'CueGray')
-            for g=1:length(worlds{1,j}.objects)
-                if strcmp(worlds{1,j}.objects{1,g}.name, 'EndWallForward')
-                    addObject(exper.worlds{1,end}, worlds{1,j}.objects{1,g}.copyItem);
-                    endPos = exper.worlds{1,end}.userdata.posDist(end);
-                    exper.worlds{1,end}.objects{1,end}.y = [endPos; endPos];
-                end
-            end
-        end
-    end
-     
     if length(experName) > 0
         exper.name = experName;
         save(sprintf('./experiments/%s', experName), 'exper');
