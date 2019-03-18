@@ -1,4 +1,4 @@
-function vr = checkConditions(cue, 'Pavlovian', 1, 'Operant', 0)
+function vr = checkConditions(vr, cue, 'Pavlovian', 1, 'Operant', 0)
 % handle the conditions
 % initialize the trial state as 0
 
