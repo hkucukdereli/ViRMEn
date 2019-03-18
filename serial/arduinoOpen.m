@@ -5,6 +5,9 @@ function open_serial = arduinoOpen(com)
 
     open_serial = serial(sprintf('COM%i', com), 'Terminator', '', 'BaudRate', 115200);
     fopen(open_serial);
+    if ~isempty(open_serial)
+        fprintf('Arduino is connected to COM%i.\n', com);
+    end
 
 end
 

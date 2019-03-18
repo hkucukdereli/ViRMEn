@@ -4,6 +4,7 @@ function arduinoClose(open_serial)
 %   fclose(open_serial)
     if ~isempty(open_serial)
         fclose(open_serial);
+	fprintf('Arduino is disconnected.\n', com);
     end
 
 end

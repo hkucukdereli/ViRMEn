@@ -143,6 +143,7 @@ function exper = createExperiment(experName, templateName, varargin)
         end
     end
      
+    % save the experiment if needed
     if length(experName) > 0
         exper.name = experName;
         save(sprintf('./experiments/%s', experName), 'exper');
