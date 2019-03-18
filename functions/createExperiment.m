@@ -70,6 +70,10 @@ function exper = createExperiment(experName, templateName, varargin)
         cueOrder = flip(cueOrder);
     end
     
+    % keep the position array
+    exper.userdata.positions = posD(posD < posDist(end,end)+1);
+    exper.userdata.cueOrder = cueOrder;
+    
     % get the floor and cue template from template file
     cue = struct(cueOrder{1},[], cueOrder{2},[]);
     for i=1:length(worlds)

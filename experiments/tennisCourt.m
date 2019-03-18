@@ -16,8 +16,17 @@ function vr = initializationCodeFun(vr)
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)  
     vr = switchWorlds(vr);
-%     display({num2str(vr.currentWorld), num2str(vr.position(2))});
 
+    pos = reshape(exper.userdata.positions, [], 2);
+    for i=1:size(pos, 2)
+        if strcmp(exper.userdata.cueOrder(mod(i,2)+1), 'CuePlus')
+            vr = goodMouse();
+        end
+        if strcmp(exper.userdata.cueOrder(mod(i,2)+1), 'CueCircle')
+        end
+    end
+
+    
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
 
