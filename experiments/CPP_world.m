@@ -20,7 +20,6 @@ function vr = initializationCodeFun(vr)
     vr = initializationForSerial(vr, 6, mouse, date, run);
     
     vr.trialCount = 0;
-    tic;
 
 
 

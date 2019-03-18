@@ -22,7 +22,7 @@ function vr = switchWorlds(vr)
         endPos = vr.exper.worlds{1, currentWorld}.userdata.posDist(end);
         edgeRadius = vr.exper.worlds{1, currentWorld}.objects{1,end}.edgeRadius;
         if endPos - edgeRadius - 2 > vr.position(2)
-            terminationCodeFun(vr);
+            vr.experimentEnded = true;
         end
     end
     
