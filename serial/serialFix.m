@@ -1,2 +1,4 @@
 function serialFix()
-    fclose('all');fclose(instrfind);
+    fclose('all');
+    fclose(instrfind);
+    delete(instrfind);

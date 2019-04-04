@@ -34,9 +34,9 @@ function exper = createExperiment(experName, templateName, varargin)
     exper.experimentCode = temp.exper.experimentCode;
     
     % populate the new experiment
-    exper = temp.exper.copyItem;
+    exper = temp.exper;
     % keep only one world with the arena floor
-    exper.worlds= []; 
+%     exper.worlds= []; 
     for i=1:length(worlds)
         if strcmp(worlds{1,i}.name, 'ArenaFloor')
             % get a copy of the world with the floor plan
@@ -52,7 +52,7 @@ function exper = createExperiment(experName, templateName, varargin)
     startLocation = exper.worlds{1,1}.startLocation;
 
     arrLength = round(arenaL / p.muLength);
-    posArr = round(normrnd(p.muLength, p.sigLength, 1, arrLength+p.worldN*(arrLength-p.overlap+1)), -1);
+    posArr = round(normrnd(p.muLength, p.sigLength, 1, arrLength+p.worldN*(arrLength-p.overlap+1))/10)*10;
     posD = cumsum(posArr);
     posD = [0, posD];
 
@@ -67,7 +67,7 @@ function exper = createExperiment(experName, templateName, varargin)
     % pick the cue order
     cueOrder = {['CuePlus'], ['CueCircle']};
     if round(rand())
-        cueOrder = flip(cueOrder);
+        cueOrder = fliplr(cueOrder);
     end
     
     % keep the position array
@@ -124,7 +124,7 @@ function exper = createExperiment(experName, templateName, varargin)
             cueLength = posDist(w,ob+1) - posDist(w,ob);
             exper.worlds{1,w}.objects{1,end}.width = cueLength;
             % adjust the tiling
-            rows = 2;
+            rows = 3;
             cols = rows * cueLength / wallHeight;
             exper.worlds{1,w}.objects{1,end}.tiling = [rows, cols];
         end
