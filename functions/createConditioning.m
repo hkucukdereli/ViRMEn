@@ -29,9 +29,16 @@ function exper = createConditioning(experName, templateName, varargin)
         exper.windows{1}.antialiasing = temp.exper.windows{1}.antialiasing;
     end
     % assign the default functions
-    exper.movementFunction = p.movement;
-    exper.transformationFunction = p.transformation;
-    exper.experimentCode = p.experiment;
+    if ~length(p.movement)
+        exper.movementFunction = temp.exper.movementFunction;
+        exper.transformationFunction = temp.exper.transformationFunction;
+        exper.experimentCode = temp.exper.experimentCode;
+    else
+        exper.movementFunction = p.movement;
+        exper.transformationFunction = p.transformation;
+        exper.experimentCode = p.experiment;
+    end
+    
     % update the code
     updateCodeText(exper);
     
