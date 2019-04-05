@@ -20,6 +20,7 @@ function exper = createConditioning(experName, templateName, varargin)
     
     % populate the experiment
     exper.name = experName;
+    exper.userdata.cuelist = p.cueList;
     exper.variables = temp.exper.variables;
     exper.variables.cueList = p.cueList;
     % set antialiasing to 6 at minimum
