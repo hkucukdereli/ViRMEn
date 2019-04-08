@@ -22,12 +22,14 @@ function vr = initializationCodeFun(vr)
                         'trials', 10,...
                         'trialDuration', 2,...
                         'blackOutDuration', 1,...
-                        'cueList', ["CueStripe45", "CueStripe135"],...
-                        'eventList', ["stim", "neutral"],...
-                        'serial', true,...
+                        'cueList', struct('stim', 'CueStripe45',...
+                                          'neutral','CueStripe135'),...
+                        'serial', false,...
                         'com', 5,...
                         'blackOut', false,...
-                        'inTrial', false);
+                        'inTrial', false,...
+                        'training', vr.training,...
+                        'imaging', vr.imaging);
                     
     vr.sessionData = struct('startTime', now(),...
                             'position',[],...
@@ -38,17 +40,7 @@ function vr = initializationCodeFun(vr)
                                               'trialType', 0,...
                                               'trialDuration',0,...
                                               'stimOn', 0);
-    vr.trialOrder = struct();
-    for i=1:length(vr.session.eventList)
-        vr.trialOrder.(vr.session.eventList(i)) = vr.session.cueList(i);
-    end
 
-    
-    if sum(strcmp(vr.exper.userdata.cuelist, vr.session.cueList)) ~= length(vr.session.cueList)
-        error('One or more cue types does not match with the virmen experiment. Please, revise. Available cue types: %s',...
-            vr.exper.userdata.cuelist);
-    end
-    
     if vr.session.serial
         serialFix;
         vr = initializationForSerial(vr, vr.session.com);
@@ -84,11 +76,11 @@ function vr = runtimeCodeFun(vr)
         % check the first cue to see if stim needs to be on
         % turn on/off the stim
         if vr.session.serial
-            if ~vr.session.blackOut & vr.session.inTrial & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), 'CueStripe135'))
+            if ~vr.session.blackOut & vr.session.inTrial & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
                 arduinoWriteMsg(vr.arduino_serial, 'S');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
-            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), 'CueStripe45'))
+            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
                 arduinoWriteMsg(vr.arduino_serial, 'O');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
@@ -105,7 +97,7 @@ function vr = runtimeCodeFun(vr)
         
         % turn off the stim during blackout
         if vr.session.serial
-            if vr.session.blackOut | any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), 'CueStripe45'))
+            if vr.session.blackOut | any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
                 arduinoWriteMsg(vr.arduino_serial, 'O');
             end
         end
@@ -139,11 +131,11 @@ function vr = runtimeCodeFun(vr)
         
         % turn on/off the stim
         if vr.session.serial
-            if ~vr.session.blackOut & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), 'CueStripe135'))
+            if ~vr.session.blackOut & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
                 arduinoWriteMsg(vr.arduino_serial, 'S');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
-            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), 'CueStripe45'))
+            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('netral')))
                 arduinoWriteMsg(vr.arduino_serial, 'O');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
@@ -163,10 +155,16 @@ function vr = runtimeCodeFun(vr)
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
     vr.sessionData.trialDuration = vr.trialDuration;
-    
-    assignin('base', 'sessionData', vr.sessionData);
-    assignin('base', 'trialInfo', vr.trialInfo);
+
+%     assignin('base', 'sessionData', vr.sessionData);
+%     assignin('base', 'trialInfo', vr.trialInfo);
 %     assignin('base', 'vr', vr);
 
-    terminationForSerial(vr);
+    sessionData = vr.sessionData;
+    trialInfo = vr.trialInfo;
+    save(sprintf('data/%s_%s_%i.mat', vr.session.mouse, vr.session.date, vr.session.run),...
+        'sessionData', 'trialInfo');
+    if vr.session.serial
+        terminationForSerial(vr);
+    end
 
