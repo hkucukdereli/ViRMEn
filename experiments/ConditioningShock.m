@@ -1,5 +1,5 @@
-function code = Conditioning
-% Conditioning   Code for the ViRMEn experiment tennisCourt.
+function code = ConditioningShock
+% ConditioningShock   Code for the ViRMEn experiment tennisCourt.
 % code = Conditioning   Returns handles to the functions that ViRMEn
 % executes during engine initialization, runtime and termination.
 
@@ -55,6 +55,18 @@ function vr = initializationCodeFun(vr)
     
     vr.waitOn = true;
     vr.previousTime = vr.timeElapsed;
+    vr.timeStamp = 0;
+    
+    vr.mean_ishi = 2; % sec
+    vr.session.trialDuration = 15*60; 
+    shock_freq = round(vr.session.trialDuration / vr.mean_ishi) / vr.session.trialDuration;
+    c = cumsum([1-shock_freq, shock_freq]);
+    vr.prob = [];
+    for t=1:vr.session.trialDuration
+        vr.prob = [vr.prob, sum(rand > c)];
+    end
+    vr.session.nShocks = length(vr.prob(vr.prob == 1));
+    vr.shockCount = 0;
     
     fprintf('Press spacebar to start the experiment.\n');
     
@@ -68,6 +80,7 @@ function vr = runtimeCodeFun(vr)
         vr.session.blackOut = false;
         vr.waitOn = false;
         vr.previousTime = vr.timeElapsed;
+        vr.timeStamp = vr.timeElapsed;
         
         % initialize the trial count
         vr.sessionData.nTrials = 1;
@@ -78,11 +91,10 @@ function vr = runtimeCodeFun(vr)
         % turn on/off the stim
         if vr.session.serial
             if ~vr.session.blackOut & vr.session.inTrial & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
-                arduinoWriteMsg(vr.arduino_serial, 'S');
+                ...
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
             elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
-                arduinoWriteMsg(vr.arduino_serial, 'O');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
             end
@@ -99,7 +111,6 @@ function vr = runtimeCodeFun(vr)
         % turn off the stim during blackout
         if vr.session.serial
             if vr.session.blackOut | any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
-                arduinoWriteMsg(vr.arduino_serial, 'O');
             end
         end
         
@@ -133,11 +144,10 @@ function vr = runtimeCodeFun(vr)
         % turn on/off the stim
         if vr.session.serial
             if ~vr.session.blackOut & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
-                arduinoWriteMsg(vr.arduino_serial, 'S');
+                ...
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
             elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
-                arduinoWriteMsg(vr.arduino_serial, 'O');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
             end
@@ -145,6 +155,22 @@ function vr = runtimeCodeFun(vr)
         
         % reset the last position
         vr.lastPos = 0;
+    end
+    
+    % check for shock
+    if vr.timeStamp > 0 
+        ind = int16(round(vr.timeElapsed - vr.timeStamp, 0));
+        if ind > 0 & ind < length(vr.prob)
+            if vr.session.onShock & vr.prob(ind)
+                5
+                arduinoWriteMsg(vr.arduino_serial, 'R')
+                vr.session.onShock = false;
+                vr.shockCount = vr.shockCount + 1;
+            elseif ~vr.session.onShock & ~vr.prob(ind)
+                6
+                vr.session.onShock = true;
+            end
+        end
     end
 
     vr = teleportCheck(vr);
@@ -168,3 +194,4 @@ function vr = terminationCodeFun(vr)
     if vr.session.serial
         terminationForSerial(vr);
     end
+
