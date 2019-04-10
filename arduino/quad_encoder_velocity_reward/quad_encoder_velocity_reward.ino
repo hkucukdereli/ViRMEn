@@ -71,7 +71,7 @@ void loop() {
       }
 
     // that's enough reward
-    if (millis() - rewardStart > 500) {
+    if (millis() - rewardStart > 1000) {
       digitalWrite(REWARD, LOW);
       digitalWrite(LED, LOW);
       }
@@ -83,7 +83,7 @@ void loop() {
       shockState = 2;
       }
 
-    if (shockState == 2 & millis() - shockStart > 1000) {
+    if (shockState == 2 & millis() - shockStart > 500) {
       shockStart = millis();
       digitalWrite(SHOCK, HIGH);
       digitalWrite(LED, HIGH);
