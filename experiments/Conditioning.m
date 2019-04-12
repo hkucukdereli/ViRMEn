@@ -153,7 +153,7 @@ function vr = runtimeCodeFun(vr)
     
     vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];
     vr.sessionData.velocity = [vr.sessionData.velocity, vr.velocity(2)];
-    vr.sessionData.nTrials
+
     if vr.sessionData.nTrials > vr.session.trials
         vr = terminationCodeFun(vr);
     end
