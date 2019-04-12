@@ -17,9 +17,7 @@ function vr = trialConditions(vr, cueType, varargin)
     sumP = (p.Pavlovian+p.Operant);
     c = sum(rand >= cumsum([0, p.Pavlovian/sumP, p.Operant/sumP]));
 
-
-    
-        % get the cue boundaries
+    % get the cue boundaries
     if strcmp(vr.exper.userdata.cueOrder{1}, vr.cueType)
         vr.positions = reshape(vr.exper.userdata.positions(1:end), 2,[])';
     end
