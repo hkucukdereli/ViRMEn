@@ -15,7 +15,7 @@ function exper = createTrials(experName, templateName, varargin)
     p = p.Results;
     
     window = p.arenaL / p.cueL;
-    lenArr = round(normrnd(800, 200, 1, window * p.nWorlds));
+    lenArr = round(normrnd(p.cueL, p.cueL*0.1, 1, window * p.nWorlds));
     n_start = 1;
     n_end = window;
     posArr = [];
