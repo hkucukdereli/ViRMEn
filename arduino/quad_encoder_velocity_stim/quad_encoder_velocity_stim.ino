@@ -103,15 +103,15 @@ void loop() {
       if (stimState == HIGH && ledState == HIGH) {
 //        digitalWrite(LED, HIGH);}
           // Pulse the LED
-          digitalWrite(LED, HIGH);
+          digitalWrite(STIM, HIGH);
           digitalWrite(LED, HIGH);
           delay(pulse);
-          digitalWrite(LED, LOW);
+          digitalWrite(STIM, LOW);
           digitalWrite(LED, LOW);
           long int offPeriod = (1. / freq * 1000) - pulse;
           delay(offPeriod);}
       else if (stimState == HIGH && ledState == LOW) {
-          digitalWrite(LED, LOW);
+          digitalWrite(STIM, LOW);
           digitalWrite(LED, LOW);}
   }
     //
