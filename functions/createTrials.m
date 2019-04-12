@@ -6,10 +6,25 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'transformation', @transformPerspectiveMex);
     addOptional(p, 'experiment', @TrialStim);
     addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
+    addOptional(p, 'nWorlds', 10);
+    addOptional(p, 'overlap', 3);
+    addOptional(p, 'arenaL', 5000);
+    addOptional(p, 'cueL', 500);
     addOptional(p, 'save', true);
     parse(p, varargin{:});
     p = p.Results;
-
+    
+    window = p.arenaL / p.cueL;
+    lenArr = round(normrnd(800, 200, 1, window * p.nWorlds));
+    n_start = 1;
+    n_end = window;
+    posArr = [];
+    for i=1:p.nWorlds
+        posArr = [posArr; [0, cumsum(lenArr(n_start : n_end))]];
+        n_start = n_start + window - p.overlap;
+        n_end = n_end + window - p.overlap;
+    end
+    
     % First load the templates
     temp = load(templateName, '-mat');
     
@@ -23,6 +38,17 @@ function exper = createTrials(experName, templateName, varargin)
     exper.userdata.cuelist = p.cueList;
     exper.variables = temp.exper.variables;
     exper.variables.cueList = p.cueList;
+    cues = repmat(p.cueList, size(lenArr));
+    exper.userdata.cues = strings(size(posArr(:,2:end)));
+    for i=1:p.nWorlds
+        exper.userdata.cues(i,:) = cues(n_start : n_end);
+        n_start = n_start + window - p.overlap;
+        n_end = n_end + window - p.overlap;
+    end
+    
+    exper.userdata.nWorlds = p.nWorlds;
+    exper.userdata.overlaps = p.overlap;
+    exper.userdata.positions = posArr;
     % set antialiasing to 6 at minimum
     if temp.exper.windows{1}.antialiasing < 6
         exper.windows{1}.antialiasing = 6;
@@ -40,9 +66,6 @@ function exper = createTrials(experName, templateName, varargin)
         exper.experimentCode = p.experiment;
     end
     
-    % update the code
-    updateCodeText(exper);
-    
     % fetch the objects from the template to use later
     worlds = temp.exper.worlds;
     arenaFloor = [];
@@ -55,6 +78,7 @@ function exper = createTrials(experName, templateName, varargin)
             wallHeight = str2num(exper.variables.wallHeight);
             arenaL = str2num(exper.variables.arenaL);
             arenaW = str2num(exper.variables.arenaW);
+            wallHeight = str2num(exper.variables.wallHeight);
             startLocation = temp.exper.worlds{i}.startLocation;
             tempWorld.startLocation = startLocation;
             tempWorld.backgroundColor = temp.exper.worlds{i}.backgroundColor;
@@ -77,18 +101,32 @@ function exper = createTrials(experName, templateName, varargin)
         end
     end
     
+%     exper.userdata.cues = posArr(:,2:end);
+%     exper.userdata.cues = strings(size(posArr, 1), size(posArr, 2)-1);
     % add new worlds and each will have a different cue
-	for w=1:length(p.cueList);
+	for w=1:p.nWorlds;
         % add a new world
-        tempWorld.name = p.cueList{w};
+%         tempWorld.name = p.cueList{w};
         addWorld(exper, tempWorld);
-        exper.worlds{w}.name = sprintf('%s', p.cueList{w});
+%         exper.worlds{w}.name = sprintf('%s', p.cueList{w});
         % add the arena floor ro the new world
         addObject(exper.worlds{w}, arenaFloor);
-        % add the right cue wll to the new world
-        addObject(exper.worlds{w}, cueWalls.(p.cueList{w}));
+        exper.worlds{w}.objects{end}.height = posArr(w,end);
+        exper.worlds{w}.objects{end}.y = repmat(posArr(w,end)/2, [2,1]);
+        % add the right cue walls to the new world
+        for o=1:size(posArr, 2)-1
+            cueInd = 2 - mod(o, 2);
+            addObject(exper.worlds{w}, cueWalls.(p.cueList{cueInd}));
+            dis = posArr(w, o+1) - posArr(w, o);
+            exper.worlds{w}.objects{end}.width = dis;
+            exper.worlds{w}.objects{end}.y = repmat(posArr(w, o) + dis*0.5, [2,1]);
+            exper.worlds{w}.objects{end}.tiling = [1, dis / wallHeight];
+        end
     end
    
+    % update the code
+    updateCodeText(exper);
+    
     % save the experiment if needed
     if p.save
         save(sprintf('./experiments/%s', experName), 'exper');

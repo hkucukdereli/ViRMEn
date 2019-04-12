@@ -6,6 +6,7 @@ function exper = createConditioning(experName, templateName, varargin)
     addOptional(p, 'transformation', @transformPerspectiveMex);
     addOptional(p, 'experiment', @Conditioning);
     addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
+    addOptional(p, 'arenaL', 4000);
     addOptional(p, 'save', true);
     parse(p, varargin{:});
     p = p.Results;
@@ -39,9 +40,6 @@ function exper = createConditioning(experName, templateName, varargin)
         exper.transformationFunction = p.transformation;
         exper.experimentCode = p.experiment;
     end
-    
-    % update the code
-    updateCodeText(exper);
     
     % fetch the objects from the template to use later
     worlds = temp.exper.worlds;
@@ -85,9 +83,14 @@ function exper = createConditioning(experName, templateName, varargin)
         exper.worlds{w}.name = sprintf('%s', p.cueList{w});
         % add the arena floor ro the new world
         addObject(exper.worlds{w}, arenaFloor);
+        exper.worlds{w}.objects{end}.height = p.arenaL;
         % add the right cue wll to the new world
         addObject(exper.worlds{w}, cueWalls.(p.cueList{w}));
+        exper.worlds{w}.objects{end}.width = p.arenaL;
     end
+    
+    % update the code
+    updateCodeText(exper);
    
     % save the experiment if needed
     if p.save
