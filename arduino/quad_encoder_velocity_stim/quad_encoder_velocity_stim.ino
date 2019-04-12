@@ -2,8 +2,8 @@
 #include <TimeLib.h>
 
 #define LED 13
-#define LICK 12
-#define STIM 11
+#define STIM 12
+#define LICK 10
 
 Encoder myEnc(2,3);
 
