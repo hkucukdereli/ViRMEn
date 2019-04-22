@@ -25,7 +25,7 @@ unsigned int shockState = 0;
 // Initialize the LED as low
 int ledState = LOW;
 int stimState = HIGH;
-int pulseState = HIGH;
+int pulseState = LOW;
 
 unsigned long previousMillis = 0;
 unsigned long previousTime = 0;
@@ -107,18 +107,20 @@ void loop() {
 //        digitalWrite(LED, HIGH);}
           // Pulse the LED
           unsigned long pulseTime = millis();
-          if (pulseState && pulseTime - pulsePrevTime > pulse) {
+          if (!pulseState && pulseTime - pulsePrevTime > pulse) {
+            digitalWrite(STIM, LOW);
+            digitalWrite(LED, LOW);
+            pulseState = HIGH;
+            pulsePrevTime = millis();
+            }
+          if (pulseState && pulseTime - pulsePrevTime > offPeriod) {
             digitalWrite(STIM, HIGH);
             digitalWrite(LED, HIGH);
             pulseState = LOW;
-            pulsePrevTime = millis();}
-          if (!pulseState && pulseTime - pulsePrevTime > pulse + offPeriod) {
-            digitalWrite(STIM, LOW);
-            digitalWrite(LED, LOW);
             pulsePrevTime = millis();
-            pulseState = HIGH;}
+            }
+          }
           
-          delay(offPeriod);}
       else if (stimState == HIGH && ledState == LOW) {
           digitalWrite(STIM, LOW);
           digitalWrite(LED, LOW);}
