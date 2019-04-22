@@ -1,3 +1,3 @@
 function velocity = moveForward(vr) %#ok<INUSD>
 
-velocity = [0 100 0 0];
+velocity = [0 10 0 0];
