@@ -51,6 +51,8 @@ function vr = initializationCodeFun(vr)
     vr.nTrials = 0;
     vr.lastPos = 0;
     
+    vr.initPos = vr.worlds{vr.currentWorld}.startLocation;
+    
     vr.currentCue = vr.exper.userdata.cues(1,1);
     vr.previousCue = vr.exper.userdata.cues(1,1);
     
@@ -71,28 +73,31 @@ function vr = runtimeCodeFun(vr)
         vr.session.blackOut = false;
         vr.waitOn = false;
         vr.previousTime = vr.timeElapsed;
-        
+
         % initialize the trial count
         vr.sessionData.nTrials = 1;
         vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
 %         vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.session.trialDuration;
+    elseif vr.waitOn & ~(vr.keyPressed == 32)
+        vr.position(2) = vr.worlds{vr.currentWorld}.startLocation(2);
     end
 
     % update the position and cue lists
     vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
-    vr.cuelist = vr.exper.userdata.cuelist(vr.currentWorld,:);
+    vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
     
     % find out the position falls into which cue
-    for p=1:length(vr.positions)-1
-        if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
-            vr.currentCue = vr.cuelist(p);
-        end
-    end
-    num2str(vr.position(2))
+%     for p=1:length(vr.positions)-1
+%         if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
+%             vr.currentCue = vr.cuelist(p);
+%         end
+%     end
+%%%     num2str(vr.position(2))
+
     if vr.position(2) > vr.positions(end-3)
-        vr.currentWorld = vr.currentWorld + 1;
-        vr.position(2) = initPos(2);
+        vr.position(2) = vr.initPos(2);
         vr.dp(:) = 0;
+        vr.currentWorld = round(vr.currentWorld) + 1;
     end
     
     % only do something if the cue has changed
@@ -113,7 +118,7 @@ function vr = runtimeCodeFun(vr)
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
-    vr.sessionData.trialDuration = vr.trialDuration;
+%     vr.sessionData.trialDuration = vr.trialDuration;
 
 %     assignin('base', 'sessionData', vr.sessionData);
 %     assignin('base', 'trialInfo', vr.trialInfo);

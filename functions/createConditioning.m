@@ -23,7 +23,7 @@ function exper = createConditioning(experName, templateName, varargin)
     exper.name = experName;
     exper.userdata.cuelist = p.cueList;
     exper.variables = temp.exper.variables;
-    exper.variables.cueList = p.cueList;
+
     % set antialiasing to 6 at minimum
     if temp.exper.windows{1}.antialiasing < 6
         exper.windows{1}.antialiasing = 6;
