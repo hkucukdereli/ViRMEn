@@ -37,7 +37,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.name = experName;
     exper.userdata.cuelist = p.cueList;
     exper.variables = temp.exper.variables;
-    exper.variables.cueList = p.cueList;
+    
     cues = repmat(p.cueList, size(lenArr));
     exper.userdata.cues = strings(size(posArr(:,2:end)));
     for i=1:p.nWorlds
@@ -108,6 +108,8 @@ function exper = createTrials(experName, templateName, varargin)
         % add a new world
 %         tempWorld.name = p.cueList{w};
         addWorld(exper, tempWorld);
+        exper.worlds{end}.name = sprintf('Arena_%i', w);
+        exper.worlds{end}.userdata=exper.userdata;
 %         exper.worlds{w}.name = sprintf('%s', p.cueList{w});
         % add the arena floor ro the new world
         addObject(exper.worlds{w}, arenaFloor);
@@ -123,7 +125,7 @@ function exper = createTrials(experName, templateName, varargin)
             exper.worlds{w}.objects{end}.tiling = [1, dis / wallHeight];
         end
     end
-   
+    
     % update the code
     updateCodeText(exper);
     
