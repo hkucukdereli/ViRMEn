@@ -84,7 +84,7 @@ function vr = runtimeCodeFun(vr)
                 arduinoWriteMsg(vr.arduino_serial, 'S');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
-            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.t.('neutral')))
+            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
                 arduinoWriteMsg(vr.arduino_serial, 'O');
                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
