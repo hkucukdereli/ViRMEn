@@ -87,18 +87,20 @@ function vr = runtimeCodeFun(vr)
     vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
     
     % find out the position falls into which cue
-%     for p=1:length(vr.positions)-1
-%         if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
-%             vr.currentCue = vr.cuelist(p);
-%         end
-%     end
-%%%     num2str(vr.position(2))
+    for p=1:length(vr.positions)-1
+        if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
+            vr.currentCue = vr.cuelist(p);
+        end
+    end
+    
+    num2str(vr.position(2))
 
     if vr.position(2) > vr.positions(end-3)
         vr.position(2) = vr.initPos(2);
         vr.dp(:) = 0;
-        vr.currentWorld = round(vr.currentWorld) + 1;
+        vr.currentWorld = round(vr.currentWorld) + 1
     end
+
     
     % only do something if the cue has changed
 %     if strcmp(vr.previousCue, vr.currentCue)
