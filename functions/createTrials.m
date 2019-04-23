@@ -109,7 +109,7 @@ function exper = createTrials(experName, templateName, varargin)
 %         tempWorld.name = p.cueList{w};
         addWorld(exper, tempWorld);
         exper.worlds{end}.name = sprintf('Arena_%i', w);
-        exper.worlds{end}.userdata=exper.userdata;
+        exper.worlds{end}.userdata = exper.userdata;
 %         exper.worlds{w}.name = sprintf('%s', p.cueList{w});
         % add the arena floor ro the new world
         addObject(exper.worlds{w}, arenaFloor);
@@ -117,8 +117,12 @@ function exper = createTrials(experName, templateName, varargin)
         exper.worlds{w}.objects{end}.y = repmat(posArr(w,end)/2, [2,1]);
         % add the right cue walls to the new world
         for o=1:size(posArr, 2)-1
-            cueInd = 2 - mod(o, 2);
-            addObject(exper.worlds{w}, cueWalls.(p.cueList{cueInd}));
+%             cueInd = 2 - mod(o, 2);
+%             addObject(exper.worlds{w}, cueWalls.(p.cueList{cueInd}));
+            
+            currentCue = exper.userdata.cues(w, o);
+            addObject(exper.worlds{w}, cueWalls.(char(currentCue)));
+            
             dis = posArr(w, o+1) - posArr(w, o);
             exper.worlds{w}.objects{end}.width = dis;
             exper.worlds{w}.objects{end}.y = repmat(posArr(w, o) + dis*0.5, [2,1]);
