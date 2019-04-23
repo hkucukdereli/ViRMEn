@@ -88,6 +88,12 @@ function vr = runtimeCodeFun(vr)
             vr.currentCue = vr.cuelist(p);
         end
     end
+    num2str(vr.position(2))
+    if vr.position(2) > vr.positions(end-3)
+        vr.currentWorld = vr.currentWorld + 1;
+        vr.position(2) = initPos(2);
+        vr.dp(:) = 0;
+    end
     
     % only do something if the cue has changed
 %     if strcmp(vr.previousCue, vr.currentCue)

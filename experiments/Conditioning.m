@@ -90,6 +90,8 @@ function vr = runtimeCodeFun(vr)
                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
             end
         end
+    elseif vr.waitOn & ~(vr.keyPressed == 32)
+        vr.position(2) = vr.worlds{vr.currentWorld}.startLocation(2);
     end
 
     if vr.session.blackOut == false & vr.session.inTrial == true & (vr.timeElapsed - vr.previousTime) > vr.trialDuration
