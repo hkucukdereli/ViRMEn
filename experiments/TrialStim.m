@@ -75,8 +75,7 @@ function vr = runtimeCodeFun(vr)
         % initialize the trial count
         vr.sessionData.nTrials = 1;
         vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
-        vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.session.trialDuration;
-        
+%         vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.session.trialDuration;
     end
 
     % update the position and cue lists
@@ -91,15 +90,15 @@ function vr = runtimeCodeFun(vr)
     end
     
     % only do something if the cue has changed
-    if strcmp(vr.previousCue, vr.currentCue)
-        if vr.currentCue == vr.session.cueList.('stim')
-            vr.onStim = true;
-        elseif vr.currentCue == vr.session.cueList.('neutral')
-            vr.onStim = false;
-        end
-        % update the previous cue because the cue has changed
-        vr.previousCue = vr.currentCue;
-    end
+%     if strcmp(vr.previousCue, vr.currentCue)
+%         if vr.currentCue == vr.session.cueList.('stim')
+%             vr.onStim = true;
+%         elseif vr.currentCue == vr.session.cueList.('neutral')
+%             vr.onStim = false;
+%         end
+%         % update the previous cue because the cue has changed
+%         vr.previousCue = vr.currentCue;
+%     end
     
     
     vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];
