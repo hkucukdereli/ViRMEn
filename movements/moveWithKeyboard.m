@@ -14,7 +14,7 @@ if ~isfield(keyboardControl,'forward')
     keyboardControl.vertical = 0;
 end
 
-linearScale = 30;
+linearScale = 300;
 rotationScale = 2;
 
 switch vr.keyPressed
