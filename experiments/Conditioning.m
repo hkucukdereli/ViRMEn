@@ -35,15 +35,15 @@ function vr = initializationCodeFun(vr)
                         'training', vr.training,...
                         'imaging', vr.imaging);
                     
-    vr.sessionData = struct('startTime', now(),...
-                            'position',[],...
-                            'velocity', [],...
-                            'nTrials', 0);
+    vr.sessionData(1:2*vr.session.trials) = struct('trialnum', 0,...
+                                                   'position',[],...
+                                                   'velocity', [],...
+                                                   'stimOn', 0,...
+                                                   'trialType', '',...
+                                                   'trialDuration',0);
                         
-    vr.trialInfo(1:vr.session.trials) = struct('trialNum', 0,...
-                                              'trialType', 0,...
-                                              'trialDuration',0,...
-                                              'stimOn', 0);
+    vr.trialInfo = struct('startTime', now(),...
+                                                 'nTrials', 0);
 
     if vr.session.serial
         serialFix;
@@ -73,21 +73,30 @@ function vr = runtimeCodeFun(vr)
         vr.previousTime = vr.timeElapsed;
         
         % initialize the trial count
-        vr.sessionData.nTrials = 1;
-        vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
-        vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.session.trialDuration;
+        vr.nTrials = 1;
+        vr.trialInfo.nTrials = vr.nTrials;
+        vr.sessionData(vr.nTrials).trialnum = vr.nTrials;
+        
+        vr.sessionData(vr.nTrials).trialDuration = vr.session.trialDuration;
+%         vr.sessionData.nTrials = 1;
+%         vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
+%         vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.session.trialDuration;
         
         % check the first cue to see if stim needs to be on
         % turn on/off the stim
         if vr.session.serial
             if ~vr.session.blackOut & vr.session.inTrial & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
                 arduinoWriteMsg(vr.arduino_serial, 'S');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
+                vr.sessionData(vr.nTrials).stimOn = 1;
+                vr.sessionData(vr.nTrials).trialType = 'stim';
+%                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
+%                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
             elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
                 arduinoWriteMsg(vr.arduino_serial, 'O');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
+                vr.sessionData(vr.nTrials).stimOn = 0;
+                vr.sessionData(vr.nTrials).trialType = 'neutral';
+%                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
+%                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
             end
         end
     elseif vr.waitOn & ~(vr.keyPressed == 32)
@@ -129,22 +138,30 @@ function vr = runtimeCodeFun(vr)
         vr.dp(:) = 0; % prevent any additional movement during teleportation
         
         % advance the trial number
-        vr.sessionData.nTrials = vr.sessionData.nTrials + 1;
-        vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
+        vr.nTrials = vr.nTrials + 1;
+        vr.trialInfo.nTrials = vr.nTrials;
+        vr.sessionData(vr.nTrials).trialnum = vr.nTrials;
+%         vr.sessionData.nTrials = vr.sessionData.nTrials + 1;
+%         vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
         % set the next trial duration
-        vr.trialDuration = [vr.trialDuration, vr.trialDuration];
-        vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.trialDuration(vr.sessionData.nTrials);
+%         vr.trialDuration = [vr.trialDuration, vr.trialDuration];
+        vr.sessionData(vr.nTrials).trialDuration = vr.session.trialDuration;
+%         vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.trialDuration(vr.sessionData.nTrials);
         
         % turn on/off the stim
         if vr.session.serial
             if ~vr.session.blackOut & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
                 arduinoWriteMsg(vr.arduino_serial, 'S');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
+                vr.sessionData(vr.nTrials).stimOn = 1;
+                vr.sessionData(vr.nTrials).trialType = 'stim';
+%                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
+%                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
             elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
                 arduinoWriteMsg(vr.arduino_serial, 'O');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
+                vr.sessionData(vr.nTrials).stimOn = 0;
+                vr.sessionData(vr.nTrials).trialType = 'neutral';
+%                 vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
+%                 vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
             end
         end
         
@@ -154,10 +171,10 @@ function vr = runtimeCodeFun(vr)
 
     vr = teleportCheck(vr);
     
-    vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];
-    vr.sessionData.velocity = [vr.sessionData.velocity, vr.velocity(2)];
+%     vr.sessionData.(vr.nTrials).position = [vr.sessionData.(vr.nTrials).position, vr.position(2) + vr.lastPos];
+%     vr.sessionData.(vr.nTrials).velocity = [vr.sessionData.(vr.nTrials).velocity, vr.velocity(2)];
 
-    if vr.sessionData.nTrials > vr.session.trials
+    if vr.nTrials > vr.session.trials
         vr = terminationCodeFun(vr);
     end
 
@@ -166,16 +183,20 @@ function vr = terminationCodeFun(vr)
     % turn off the stim before termination 
     arduinoWriteMsg(vr.arduino_serial, 'O');
     
-    vr.sessionData.trialDuration = vr.trialDuration;
+%     vr.sessionData.trialDuration = vr.trialDuration;
     
 %     assignin('base', 'sessionData', vr.sessionData);
 %     assignin('base', 'trialInfo', vr.trialInfo);
 %     assignin('base', 'vr', vr);
 
+    % save the data
     sessionData = vr.sessionData;
     trialInfo = vr.trialInfo;
+    session = vr.session;
     save(sprintf('%s/data/%s_%s_%i_%s.mat', vr.session.basedir, vr.session.mouse, vr.session.date, vr.session.run, vr.session.experiment),...
-        'sessionData', 'trialInfo');
+        'session', 'sessionData', 'trialInfo');
+    
+    % serial termination if necessary
     if vr.session.serial
         terminationForSerial(vr);
     end
