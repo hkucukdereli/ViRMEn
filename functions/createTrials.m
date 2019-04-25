@@ -39,6 +39,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.variables = temp.exper.variables;
     
     cues = repmat(p.cueList, size(lenArr));
+    exper.userdata.cuestrack = cues;
     exper.userdata.cues = strings(size(posArr(:,2:end)));
     for i=1:p.nWorlds
         exper.userdata.cues(i,:) = cues(n_start : n_end);
@@ -49,6 +50,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.userdata.nWorlds = p.nWorlds;
     exper.userdata.overlaps = p.overlap;
     exper.userdata.positions = posArr;
+    exper.userdata.postrack = lenArr;
     % set antialiasing to 6 at minimum
     if temp.exper.windows{1}.antialiasing < 6
         exper.windows{1}.antialiasing = 6;
