@@ -38,6 +38,8 @@ function vr = initializationCodeFun(vr)
                             'position',[],...
                             'velocity', [],...
                             'timestamp', [],...
+                            'stimon', [],...
+                            'stimoff', [],...
                             'nTrials', 0);
                         
     vr.trialInfo(1:1000) = struct('trialNum', 0,...
@@ -67,7 +69,7 @@ function vr = initializationCodeFun(vr)
     
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
-
+vr.position(2)
     % Press space to start
     if vr.waitOn & vr.keyPressed == 32
         vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
@@ -83,11 +85,13 @@ function vr = runtimeCodeFun(vr)
         if vr.currentCue == vr.session.cueList.('stim')
             vr.onStim = true;
             if vr.session.serial
+                vr.sessionData.stimon = [vr.sessionData.stimon, vr.timeElapsed];
                 arduinoWriteMsg(vr.arduino_serial, 'S');
             end
         elseif vr.currentCue == vr.session.cueList.('neutral')
             vr.onStim = false;
             if vr.session.serial
+                vr.sessionData.stimoff = [vr.sessionData.stimoff, vr.timeElapsed];
                 arduinoWriteMsg(vr.arduino_serial, 'O');
             end
         end
@@ -102,15 +106,16 @@ function vr = runtimeCodeFun(vr)
     % find out the position falls into which cue
     for p=1:length(vr.positions)-1
         if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
-            vr.currentCue = vr.cuelist(p);
+            vr.currentCue = vr.cuelist(p); 
         end
     end
 
-    if vr.position(2) > vr.positions(end-3)
-        vr.lastPos = vr.lastPos + vr.position(2);
-        vr.position(2) = vr.initPos(2);
+    if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps )
         vr.dp(:) = 0;
+        vr.lastPos = vr.lastPos + vr.position(2);
         vr.currentWorld = round(vr.currentWorld) + 1;
+%         vr.position(2) = vr.initPos(2);
+        vr.position(2) = 0;
     end
 
     % only do something if the cue has changed
@@ -118,11 +123,13 @@ function vr = runtimeCodeFun(vr)
         if vr.currentCue == vr.session.cueList.('stim')
             vr.onStim = true;
             if vr.session.serial
+                vr.sessionData.stimon = [vr.sessionData.stimon, vr.timeElapsed];
                 arduinoWriteMsg(vr.arduino_serial, 'S');
             end
         elseif vr.currentCue == vr.session.cueList.('neutral')
             vr.onStim = false;
             if vr.session.serial
+                vr.sessionData.stimoff = [vr.sessionData.stimoff, vr.timeElapsed];
                 arduinoWriteMsg(vr.arduino_serial, 'O');
             end
         end
