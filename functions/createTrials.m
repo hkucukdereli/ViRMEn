@@ -7,7 +7,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'experiment', @TrialStim);
     addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
     addOptional(p, 'nWorlds', 10);
-    addOptional(p, 'overlap', 3);
+    addOptional(p, 'overlap', 4);
     addOptional(p, 'arenaL', 5000);
     addOptional(p, 'cueL', 500);
     addOptional(p, 'save', true);
