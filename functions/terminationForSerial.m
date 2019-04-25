@@ -4,9 +4,7 @@ function terminationForSerial(vr)
     
     % Turn off stim if on
     if vr.nTrials
-        if vr.trialInfo(vr.nTrials).stimOn
-            arduinoWriteMsg(vr.arduino_serial, 'O');
-        end
+        arduinoWriteMsg(vr.arduino_serial, 'O');
     end
     % Close the open serial port
     arduinoClose(vr.arduino_serial);
