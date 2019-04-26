@@ -21,7 +21,8 @@ function vr = initializationCodeFun(vr)
                         'run', 1,...
                         'rig', 'VR_training',...
                         'experiment', 'testing',...
-                        'basedir', 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab',...
+                        'basedir', 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn',...
+                        'trialDuration', 3,...
                         'timeout', 60,...
                         'blackOutDuration', 2,...
                         'cueList', struct('stim', 'CueStripe45',...
@@ -37,7 +38,8 @@ function vr = initializationCodeFun(vr)
                         'cues', {vr.exper.userdata.cuestrack});
                         
                     
-    vr.sessionData = struct('startTime', now(),...
+    vr.sessionData = struct('startTime', 0,...
+                            'endTime', 0,...
                             'position',[],...
                             'velocity', [],...
                             'timestamp', [],...
@@ -62,6 +64,9 @@ function vr = initializationCodeFun(vr)
     vr.nTrials = 0;
     vr.lastPos = 0;
     
+    vr.startTime = 0;
+    vr.endTime = 0;
+    
     vr.initPos = vr.worlds{vr.currentWorld}.startLocation;
     
     vr.currentCue = vr.exper.userdata.cues(1,1);
@@ -76,9 +81,13 @@ function vr = initializationCodeFun(vr)
     
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
-vr.position(2)
+
     % Press space to start
     if vr.waitOn & vr.keyPressed == 32
+        % log the start time
+        vr.startTime = vr.timeElapsed;
+        vr.sessionData.startTime = vr.startTime;
+        
         vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
         vr.session.inTrial = true;
         vr.session.blackOut = false;
@@ -148,6 +157,16 @@ vr.position(2)
     vr.sessionData.velocity = [vr.sessionData.velocity, vr.velocity(2)];
     vr.sessionData.timestamp = [vr.sessionData.timestamp, vr.timeElapsed];
 
+    if ~vr.waitOn
+        if vr.timeElapsed - vr.startTime > vr.session.trialDuration
+            vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
+            vr.session.inTrial = true;
+            vr.session.blackOut = false;
+            vr.waitOn = false;
+            vr.endTime = vr.timeElapsed;
+            vr.experimentEnded = 1;
+        end
+    end
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
@@ -156,7 +175,10 @@ function vr = terminationCodeFun(vr)
 %     assignin('base', 'sessionData', vr.sessionData);
 %     assignin('base', 'trialInfo', vr.trialInfo);
 %     assignin('base', 'vr', vr);
-
+    
+    if vr.endTime
+        vr.sessionData.endTime = vr.endTime;
+    end
     sessionData = vr.sessionData;
     trialInfo = vr.trialInfo;
     session = vr.session;
