@@ -44,8 +44,12 @@ function vr = initializationCodeFun(vr)
                                                    'trialDuration',0);
                         
     vr.trialInfo = struct('startTime', now(),...
-                                                 'nTrials', 0);
+                          'nTrials', 0);
 
+    if ~exist(vr.session.basedir, 'dir')
+        error('Folder does not exist. Check if the path to data folder is correct.');
+    end
+    
     if vr.session.serial
         serialFix;
         vr = initializationForSerial(vr, vr.session.com);
