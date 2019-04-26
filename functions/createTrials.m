@@ -14,7 +14,7 @@ function exper = createTrials(experName, templateName, varargin)
     parse(p, varargin{:});
     p = p.Results;
     
-    window = p.arenaL / p.cueL;
+    window = round(p.arenaL / p.cueL);
     lenArr = round(normrnd(p.cueL, p.cueL*0.1, 1, window * p.nWorlds));
     n_start = 1;
     n_end = window;
@@ -39,9 +39,11 @@ function exper = createTrials(experName, templateName, varargin)
     exper.variables = temp.exper.variables;
     
     cues = repmat(p.cueList, size(lenArr));
-    cues = cues(1:size(lenArr));
+    cues = cues(1, 1:size(lenArr, 2));
     exper.userdata.cuestrack = cues;
     exper.userdata.cues = strings(size(posArr(:,2:end)));
+    n_start = 1;
+    n_end = window;
     for i=1:p.nWorlds
         exper.userdata.cues(i,:) = cues(n_start : n_end);
         n_start = n_start + window - p.overlap;
