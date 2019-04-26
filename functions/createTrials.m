@@ -39,6 +39,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.variables = temp.exper.variables;
     
     cues = repmat(p.cueList, size(lenArr));
+    cues = cues(1:size(lenArr));
     exper.userdata.cuestrack = cues;
     exper.userdata.cues = strings(size(posArr(:,2:end)));
     for i=1:p.nWorlds
