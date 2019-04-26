@@ -21,7 +21,7 @@ function vr = initializationCodeFun(vr)
                         'run', 1,...
                         'rig', 'VR_training',...
                         'experiment', 'conditioning',...
-                        'basedir', 'C:\Users\andermann\Documents\MATLAB\ViRMEn',...
+                        'basedir', 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn',...
                         'trials', 2,...
                         'trialDuration', 30*60,...
                         'blackOutDuration', 15*60,...
@@ -43,7 +43,8 @@ function vr = initializationCodeFun(vr)
                                                    'trialType', '',...
                                                    'trialDuration',0);
                         
-    vr.trialInfo = struct('startTime', now(),...
+    vr.trialInfo = struct('startTime', 0,...
+                          'endTime', 0,...
                           'nTrials', 0);
 
     if ~exist(vr.session.basedir, 'dir')
@@ -59,6 +60,9 @@ function vr = initializationCodeFun(vr)
     vr.nTrials = 0;
     vr.lastPos = 0;
     
+    vr.startTime = 0;
+    vr.endTime = 0;
+    
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
     
     vr.waitOn = true;
@@ -71,6 +75,10 @@ function vr = runtimeCodeFun(vr)
 
     % Press space to start
     if vr.waitOn & vr.keyPressed == 32
+        % log the start time
+        vr.startTime = vr.timeElapsed;
+        vr.trialInfo.startTime = vr.startTime;
+        
         vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
         vr.session.inTrial = true;
         vr.session.blackOut = false;
@@ -184,7 +192,8 @@ function vr = runtimeCodeFun(vr)
     end
 
     if vr.nTrials > vr.session.trials
-        vr = terminationCodeFun(vr);
+        vr.endTime = vr.timeElapsed;
+        vr.experimentEnded = 1;
     end
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
@@ -195,6 +204,9 @@ function vr = terminationCodeFun(vr)
 %     assignin('base', 'trialInfo', vr.trialInfo);
 %     assignin('base', 'vr', vr);
 
+    if vr.endTime
+        vr.trialInfo.endTime = vr.endTime;
+    end
     % save the data
     sessionData = vr.sessionData;
     trialInfo = vr.trialInfo;
