@@ -27,7 +27,7 @@ function vr = initializationCodeFun(vr)
                         'blackOutDuration', 15*60,...
                         'cueList', struct('stim', 'CueStripe45',...
                                           'neutral','CueStripe135'),...
-                        'serial', true,...
+                        'serial', false,...
                         'com', 4,...
                         'blackOut', false,...
                         'inTrial', false,...
@@ -38,6 +38,7 @@ function vr = initializationCodeFun(vr)
     vr.sessionData(1:2*vr.session.trials) = struct('trialnum', 0,...
                                                    'position',[],...
                                                    'velocity', [],...
+                                                   'timestamp', [],...
                                                    'stimOn', 0,...
                                                    'trialType', '',...
                                                    'trialDuration',0);
@@ -171,8 +172,12 @@ function vr = runtimeCodeFun(vr)
 
     vr = teleportCheck(vr);
     
-%     vr.sessionData.(vr.nTrials).position = [vr.sessionData.(vr.nTrials).position, vr.position(2) + vr.lastPos];
-%     vr.sessionData.(vr.nTrials).velocity = [vr.sessionData.(vr.nTrials).velocity, vr.velocity(2)];
+    % save data
+    if vr.nTrials
+        vr.sessionData(vr.nTrials).position = [vr.sessionData(vr.nTrials).position, vr.position(2) + vr.lastPos];
+        vr.sessionData(vr.nTrials).velocity = [vr.sessionData(vr.nTrials).velocity, vr.velocity(2)];
+        vr.sessionData(vr.nTrials).timestamp = [vr.sessionData(vr.nTrials).timestamp, vr.timeElapsed];
+    end
 
     if vr.nTrials > vr.session.trials
         vr = terminationCodeFun(vr);
@@ -180,9 +185,6 @@ function vr = runtimeCodeFun(vr)
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
-    % turn off the stim before termination 
-    arduinoWriteMsg(vr.arduino_serial, 'O');
-    
 %     vr.sessionData.trialDuration = vr.trialDuration;
     
 %     assignin('base', 'sessionData', vr.sessionData);
@@ -198,7 +200,7 @@ function vr = terminationCodeFun(vr)
     
     % serial termination if necessary
     if vr.session.serial
-        % Turn off stim if off
+        % Turn off stim off
         arduinoWriteMsg(vr.arduino_serial, 'O');
         terminationForSerial(vr);
     end
