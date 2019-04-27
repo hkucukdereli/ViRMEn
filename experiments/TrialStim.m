@@ -127,9 +127,22 @@ function vr = runtimeCodeFun(vr)
     end
 
     if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps )
+        % stop all movement until we can figure out what to do
         vr.dp(:) = 0;
+        % get the latest position to keep the position info continuous
         vr.lastPos = vr.lastPos + vr.position(2);
-        vr.currentWorld = round(vr.currentWorld) + 1;
+        % advance the world unless it's in the last one. 
+        % otherwise, teminate the experiment gracefully
+        if vr.currentWorld + 1 > vr.exper.userdata.nWorlds
+            vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
+            vr.session.inTrial = true;
+            vr.session.blackOut = false;
+            vr.waitOn = false;
+            vr.endTime = vr.timeElapsed;
+            vr.experimentEnded = 1;
+        else
+            vr.currentWorld = round(vr.currentWorld) + 1;
+        end
 %         vr.position(2) = vr.initPos(2);
         vr.position(2) = 0;
     end
