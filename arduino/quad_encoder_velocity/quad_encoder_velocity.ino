@@ -29,6 +29,7 @@ void loop() {
     long vel = (pos - prevPos) / interval * 1000;
     b = (byte *) &vel;
     Serial.write(b, 4);
+    Serial.println(vel);
     prevPos = pos;
     pulse = !pulse;}
 
