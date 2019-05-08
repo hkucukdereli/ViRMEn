@@ -11,7 +11,7 @@ const int VISSTIM = 13;
 const int OUTPIN = 11;
 
 unsigned long previousMillis = 0;
-const float sampling = 20;
+const float sampling = 40;
 const float interval = 1000.0 / sampling;
 const long pulseDur = 1;
 const int  samplingDur = 100;
@@ -45,7 +45,7 @@ void loop() {
     previousMillis = currentMillis;
     long vel = (pos - prevPos) / interval * 1000;
     b = (byte *) &vel;
-    Serial.write(b, 4);
+//    Serial.write(b, 4);
 //    Serial.println(vel);
     bufferArr[pulseCount] = vel;
     pulseCount++;
@@ -67,24 +67,24 @@ void loop() {
 //  Serial.println(averageVel);
 
   bool VisStim = digitalRead(VISSTIM);
-  if (!pulseState && !VisStim) {
-    // Low
-//    Serial.println("low");
-    }
-  else if (!pulseState && VisStim) {
+  if (!pulseState && VisStim) {
     // Rising
     pulseState = 1;
     beforeVel = averageVel;
-    Serial.println("rising");
+//    Serial.println("rising");
     }
-  else if (pulseState && VisStim) {
-    // High
+//  else if (!pulseState && !VisStim) {
+//    // Low
+//    Serial.println("low");
+//    }
+//  else if (pulseState && VisStim) {
+//    // High
 //    Serial.println("high");
-    }
+//    }
   else if (pulseState && !VisStim) {
     // Falling
     pulseState = 0;
-    Serial.println("falling");
+//    Serial.println("falling");
     tic0 = millis();
     postStim = 1;    
     }
@@ -93,7 +93,14 @@ void loop() {
   if (postStim && toc0 - tic0 > samplingDur) {
     afterVel = averageVel;
     postStim = 0;
-    digitalWrite(OUTPIN, HIGH);
+//    Serial.println(afterVel - beforeVel);
+    if (afterVel - beforeVel > 0.25
+    ) {
+      digitalWrite(OUTPIN, HIGH);
+      delay(50);
+      digitalWrite(OUTPIN, LOW);
+      }
+    
 //    Serial.println(beforeVel);
 //    Serial.println(afterVel);
     }
