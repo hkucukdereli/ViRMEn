@@ -11,13 +11,23 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'arenaL', 5000);
     addOptional(p, 'cueL', 500);
     addOptional(p, 'save', true);
+    addOptional(p, 'shuffle', true);
     parse(p, varargin{:});
     p = p.Results;
     
     window = round(p.arenaL / p.cueL);
-%     lenArr = round(normrnd(p.cueL, p.cueL*0.1, 1, window * p.nWorlds));
-    lenArr = round(normrnd(p.cueL, p.cueL*0.1, 1, window));
-    lenArr = repmat(lenArr, [1, p.nWorlds]);
+
+    if p.shuffle
+        lenArr = [];
+        lens = round(normrnd(p.cueL, p.cueL*0.1, 1, window));
+        for k=1:p.nWorlds
+            lenArr = [lenArr, lens(randperm(length(lens)))];
+        end
+    else
+        lenArr = round(normrnd(p.cueL, p.cueL*0.1, 1, window * p.nWorlds));
+    end
+
+%     lenArr = repmat(lenArr, [1, p.nWorlds]);
     n_start = 1;
     n_end = window;
     posArr = [];
