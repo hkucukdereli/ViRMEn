@@ -22,14 +22,14 @@ function exper = createTrials(experName, templateName, varargin)
 
     if p.shuffle
         lenArr = [];
-        lens = round(normrnd(p.cueL, p.cueL*0.1, 1, p.shuffle));
+        lens = p.cueL + round(exprnd(250, 1, 2*window));
         for k=1:p.nWorlds
             lenArr = [lenArr, lens(randperm(length(lens)))];
         end
     else
         lenArr = round(normrnd(p.cueL, p.cueL*0.2, 1, window * p.nWorlds));
     end
-    figure;histogram(lens);hold on;histogram(lenArr);
+    figure;hold on;histogram(lenArr);
 
 %     lenArr = repmat(lenArr, [1, p.nWorlds]);
     n_start = 1;
