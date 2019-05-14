@@ -15,39 +15,37 @@ function params = createTrialsTest(experName, templateName, varargin)
     parse(p, varargin{:});
     p = p.Results;
     
-    window = round(p.arenaL / p.cueL);
+    window = round(p.arenaL / p.cueL)
     if p.shuffle < window
         p.shuffle = window;
     end
 
-    if p.shuffle
-        lenArr = [];
-%         lens = round(normrnd(p.cueL, p.cueL*0.1, 1, window));
-        lens = p.cueL + round(exprnd(250, [1, 2*window])) 
-        for k=1:p.nWorlds
-            lenArr = [lenArr, lens(randperm(length(lens)))];
-        end
-    else
-        lenArr = round(normrnd(p.cueL, p.cueL*0.2, 1, window * p.nWorlds) + 800);
+    lenArr = [];
+%     lens = p.cueL + round(exprnd(400, 1, window));
+    for k=1:p.nWorlds/2
+        lens = p.cueL + round(exprnd(400, 1, window));
+        temp = [lens(randperm(length(lens))); lens(randperm(length(lens)))];
+        temp = temp(:)';
+        lenArr = [lenArr, temp];
     end
+
+%     n_start = 1;
+%     n_end = window;
+%     posArr = [];
+%     for i=1:p.nWorlds
+%         posArr = [posArr; [0, cumsum(lenArr(n_start : n_end))]];
+%         n_start = n_start + window - p.overlap;
+%         n_end = n_end + window - p.overlap;
+%     end
     
-    n_start = 1;
-    n_end = window;
-    posArr = [];
-    for i=1:p.nWorlds
-        posArr = [posArr; [0, cumsum(lenArr(n_start : n_end))]];
-        n_start = n_start + window - p.overlap;
-        n_end = n_end + window - p.overlap;
-    end
+%     mines = [];
+%     for k=1:length(lenArr)
+%         display(lenArr(k)*rand());
+%         kmines = [mines, lenArr(k)*rand()];
+%     end
     
-    mines = [];
-    for k=1:length(lenArr)
-        display(lenArr(k)*rand());
-        kmines = [mines, lenArr(k)*rand()];
-    end
-    
-    params = struct('lens',lens, 'lenArr', lenArr, 'posArr',posArr, 'mines',mines);
-    
+%     params = struct('lens',lens, 'lenArr', lenArr, 'posArr',posArr, 'mines',mines, 'window',window);
+    params = struct('lens',lens, 'lenArr', lenArr);
     
 %     A = [];
 %     count = 0;
