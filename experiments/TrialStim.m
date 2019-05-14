@@ -45,7 +45,8 @@ function vr = initializationCodeFun(vr)
                             'timestamp', [],...
                             'stimon', [],...
                             'stimoff', [],...
-                            'nTrials', 0);
+                            'nTrials', 0,...
+                            'shockTime', []);
                         
     vr.trialInfo(1:1000) = struct('trialNum', 0,...
                                   'trialType', 0,...
@@ -60,7 +61,8 @@ function vr = initializationCodeFun(vr)
         serialFix;
         vr = initializationForSerial(vr, vr.session.com);
     end
-                              
+                
+    vr.shockCount = 1;
     vr.nTrials = 0;
     vr.lastPos = 0;
     
@@ -164,6 +166,14 @@ function vr = runtimeCodeFun(vr)
         end
         % update the previous cue because the cue has changed
         vr.previousCue = vr.currentCue;
+    end
+    
+    % check if there's shock-mine
+    if vr.position(2) > vr.exper.userdata.minepos(vr.shockCount)
+        arduinoWriteMsg(vr.arduino_serial, 'P');
+        vr.sessionData.shockTime = [vr.sessionData.shockTime, vr.shockCount];
+%         display('SHOCK!');display(vr.shockCount);
+        vr.shockCount = vr.shockCount + 1;
     end
     
     vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];

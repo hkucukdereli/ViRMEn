@@ -22,14 +22,24 @@ function exper = createTrials(experName, templateName, varargin)
 
     if p.shuffle
         lenArr = [];
-        lens = p.cueL + round(exprnd(250, 1, 2*window));
-        for k=1:p.nWorlds
-            lenArr = [lenArr, lens(randperm(length(lens)))];
+    %     lens = p.cueL + round(exprnd(400, 1, window));
+        for k=1:p.nWorlds/2
+            lens = p.cueL + round(exprnd(150, 1, window));
+            temp = [lens(randperm(length(lens))); lens(randperm(length(lens)))];
+            temp = temp(:)';
+            lenArr = [lenArr, temp];
         end
     else
         lenArr = round(normrnd(p.cueL, p.cueL*0.2, 1, window * p.nWorlds));
     end
     figure;hold on;histogram(lenArr);
+    
+    mineLenArr = lenArr;
+    for kl=1:length(lenArr)
+        mineLenArr(kl) = lenArr(kl)*round(rand(1), 2);
+    end
+    mineArr = [0, lenArr(1:end-1)] + mineLenArr;
+    mineArr = cumsum(mineArr);
 
 %     lenArr = repmat(lenArr, [1, p.nWorlds]);
     n_start = 1;
@@ -70,6 +80,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.userdata.overlaps = p.overlap;
     exper.userdata.positions = posArr;
     exper.userdata.postrack = lenArr;
+    exper.userdata.minepos = mineArr;
     % set antialiasing to 6 at minimum
     if temp.exper.windows{1}.antialiasing < 6
         exper.windows{1}.antialiasing = 6;
