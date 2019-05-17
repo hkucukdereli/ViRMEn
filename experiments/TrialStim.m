@@ -20,7 +20,7 @@ function vr = initializationCodeFun(vr)
                         'date', '190425',...
                         'run', 1,...
                         'rig', 'VR_training',...
-                        'experiment', 'testing',...
+                        'experiment', 'shock',... %'trial' or 'shock'
                         'basedir', '',...
                         'trialDuration', 60*60,...
                         'timeout', 60,...
@@ -62,8 +62,13 @@ function vr = initializationCodeFun(vr)
         serialFix;
         vr = initializationForSerial(vr, vr.session.com);
     end
-                
-    vr.shockCount = 1;
+
+    if strcmp(vr.session.experiment, 'shock')
+        vr.shockCount = 1;
+    elseif strcmp(vr.session.experiment, 'trial')
+        vr.shockCount = 0;
+    end
+    
     vr.nTrials = 0;
     vr.lastPos = 0;
     
@@ -170,12 +175,14 @@ function vr = runtimeCodeFun(vr)
     end
     
     % check if there's shock-mine
-    if vr.position(2) + vr.lastPos > vr.exper.userdata.minepos(vr.shockCount)
-        arduinoWriteMsg(vr.arduino_serial, 'P');
-        vr.sessionData.shockCount = [vr.sessionData.shockCount, vr.shockCount];
-        vr.sessionData.shockTime = [vr.sessionData.shockTime, vr.timeElapsed];
-%         display('SHOCK!');display(vr.shockCount);
-        vr.shockCount = vr.shockCount + 1;
+    if vr.shockCount
+        if vr.position(2) + vr.lastPos > vr.exper.userdata.minepos(vr.shockCount)
+            arduinoWriteMsg(vr.arduino_serial, 'P');
+            vr.sessionData.shockCount = [vr.sessionData.shockCount, vr.shockCount];
+            vr.sessionData.shockTime = [vr.sessionData.shockTime, vr.timeElapsed];
+    %         display('SHOCK!');display(vr.shockCount);
+            vr.shockCount = vr.shockCount + 1;
+        end
     end
     
     vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];
