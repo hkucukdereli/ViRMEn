@@ -14,7 +14,7 @@ code.termination = @terminationCodeFun;
 function vr = initializationCodeFun(vr)
     
     vr.session = struct('serial', true,...
-                        'com', 12);
+                        'com', 5);
 
     if vr.session.serial
         serialFix;
@@ -31,7 +31,7 @@ function vr = runtimeCodeFun(vr)
     
     if vr.keyPressed == 32
         display('SHOCK');
-        arduinoWriteMsg(vr.arduino_serial, 'P');
+        arduinoWriteMsg(vr.arduino_serial, 'Q');
     end
 
 
