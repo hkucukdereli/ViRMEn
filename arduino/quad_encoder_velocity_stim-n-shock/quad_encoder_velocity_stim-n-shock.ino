@@ -24,6 +24,8 @@ unsigned long punishStart = 0;
 unsigned long punishStop = 0;
 bool onPunish = false;
 int punishCount = 0;
+bool onPunishQ = false;
+int punishCountQ = 0;
 
 // Initialize the LED as low
 int ledState = LOW;
@@ -86,6 +88,15 @@ void loop() {
       onPunish = true;
       punishCount++;
       break;
+
+     case 'Q':
+      // initate punishment timer
+      punishStartQ = millis();
+      digitalWrite(PUNISH, HIGH);
+//      digitalWrite(LED, HIGH);
+      onPunishQ = true;
+      break;
+      
     default:
       break;}
       
@@ -155,5 +166,10 @@ void loop() {
     digitalWrite(PUNISH, HIGH);
     onPunish = false;
     punishCount = 0;}
+
+  // Single shock
+  if (onPunishQ && punishStartQ - millis() > 50) {
+    digitalWrite(PUNISH, LOW);
+    onPunishQ = false;}
       
 }
