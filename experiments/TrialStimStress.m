@@ -28,8 +28,8 @@ function vr = initializationCodeFun(vr)
                         'stressDur', 5*60,...
                         'cueList', struct('stim', 'CueStripe45',...
                                           'neutral','CueStripe135'),...
-                        'serial', false,...
-                        'com', 12,...
+                        'serial', true,...
+                        'com', 5,...
                         'inTrial', false,...
                         'timeOut', true,...
                         'onStim', false,...
@@ -50,7 +50,7 @@ function vr = initializationCodeFun(vr)
                             'nTrials', 0,...
                             'shockTime', [],...
                             'shockCount', [],...
-                            'stressShocks', vr.shocktimes);
+                            'stressShocks', []);
                         
     vr.trialInfo(1:1000) = struct('trialNum', 0,...
                                   'trialType', 0,...
@@ -74,10 +74,10 @@ function vr = initializationCodeFun(vr)
         
         vr.shocktimes = cumsum(rand([1,15])/3.2);
         vr.shocktimes = vr.shocktimes(vr.shocktimes<2);
-        for i=1:9
+        for i=1:length(vr.session.stressDur/30)-1
             shocktimes = cumsum(rand([1,15])/3.2);
             shocktimes = shocktimes(shocktimes < 2);
-            vr.shocktimes = [vr.shocktimes, shocktimes + normrnd(30,1)*i];
+            vr.shocktimes = [vr.shocktimes, shocktimes + normrnd(3,1)*10*i];
         end
         vr.sessionData.stressShocks = vr.shocktimes;
     elseif strcmp(vr.session.experiment, 'trial')
@@ -119,7 +119,7 @@ function vr = runtimeCodeFun(vr)
     % start the stress protocol
     if strcmp(vr.session.experiment, 'stress')
         if vr.stressOn && ~vr.waitOn
-            if vr.timeElapsed - vr.startTime > vr.shocktimes(vr.shockCount)
+            if vr.shockCount < length(vr.shockCount) && vr.timeElapsed - vr.startTime > vr.shocktimes(vr.shockCount)
                 if vr.session.serial
                     arduinoWriteMsg(vr.arduino_serial, 'Q');
                 end
@@ -210,15 +210,15 @@ function vr = runtimeCodeFun(vr)
     end
     
     % check if there's shock-mine
-    if vr.shockCount
-        if vr.position(2) + vr.lastPos > vr.exper.userdata.minepos(vr.shockCount)
-            arduinoWriteMsg(vr.arduino_serial, 'P');
-            vr.sessionData.shockCount = [vr.sessionData.shockCount, vr.shockCount];
-            vr.sessionData.shockTime = [vr.sessionData.shockTime, vr.timeElapsed];
-    %         display('SHOCK!');display(vr.shockCount);
-            vr.shockCount = vr.shockCount + 1;
-        end
-    end
+%     if vr.shockCount
+%         if vr.position(2) + vr.lastPos > vr.exper.userdata.minepos(vr.shockCount)
+%             arduinoWriteMsg(vr.arduino_serial, 'P');
+%             vr.sessionData.shockCount = [vr.sessionData.shockCount, vr.shockCount];
+%             vr.sessionData.shockTime = [vr.sessionData.shockTime, vr.timeElapsed];
+%     %         display('SHOCK!');display(vr.shockCount);
+%             vr.shockCount = vr.shockCount + 1;
+%         end
+%     end
     
     vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];
     vr.sessionData.velocity = [vr.sessionData.velocity, vr.velocity(2)];
