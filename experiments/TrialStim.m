@@ -183,7 +183,7 @@ function vr = runtimeCodeFun(vr)
     % check if there's shock-mine
     if vr.shockCount
         if vr.position(2) + vr.lastPos > vr.exper.userdata.minepos(vr.shockCount)
-            arduinoWriteMsg(vr.arduino_serial, 'P');
+            arduinoWriteMsg(vr.arduino_serial, 'PP');
             vr.sessionData.shockCount = [vr.sessionData.shockCount, vr.shockCount];
             vr.sessionData.shockTime = [vr.sessionData.shockTime, vr.timeElapsed];
     %         display('SHOCK!');display(vr.shockCount);
