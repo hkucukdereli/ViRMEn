@@ -31,7 +31,7 @@ function vr = runtimeCodeFun(vr)
     
     if vr.keyPressed == 32
         display('SHOCK');
-        arduinoWriteMsg(vr.arduino_serial, 'Q');
+        arduinoWriteMsg(vr.arduino_serial, 'PP');
     end
 
 

@@ -1,5 +1,5 @@
-function code = TrialStim
-% TrialStim   Code for the ViRMEn experiment tennisCourt.
+function code = TrialStimStress
+% TrialStimStress   Code for the ViRMEn experiment tennisCourt.
 % code = Conditioning   Returns handles to the functions that ViRMEn
 % executes during engine initialization, runtime and termination.
 
@@ -21,14 +21,14 @@ function vr = initializationCodeFun(vr)
                         'run', 1,...
                         'rig', 'VR_training',...
                         'experiment', 'stress',... %'trial' or 'shock' or 'stress'
-                        'basedir', '',...
+                        'basedir', 'C:\Users\hkucukde\Dropbox\Hakan\AndermannLab\code\MATLAB\ViRMEn',...
                         'trialDuration', 60*60,...
                         'timeout', 60,...
                         'blackOutDuration', 2,...
                         'stressDur', 5*60,...
                         'cueList', struct('stim', 'CueStripe45',...
                                           'neutral','CueStripe135'),...
-                        'serial', true,...
+                        'serial', false,...
                         'com', 5,...
                         'inTrial', false,...
                         'timeOut', true,...
@@ -74,12 +74,13 @@ function vr = initializationCodeFun(vr)
         
         vr.shocktimes = cumsum(rand([1,15])/3.2);
         vr.shocktimes = vr.shocktimes(vr.shocktimes<2);
-        for i=1:length(vr.session.stressDur/30)-1
-            shocktimes = cumsum(rand([1,15])/3.2);
-            shocktimes = shocktimes(shocktimes < 2);
-            vr.shocktimes = [vr.shocktimes, shocktimes + normrnd(3,1)*10*i];
-        end
         vr.sessionData.stressShocks = vr.shocktimes;
+        for i=1:(vr.session.stressDur/30)-1
+            vr.shocktimes = cumsum(rand([1,15])/3.2);
+            vr.shocktimes = vr.shocktimes(vr.shocktimes < 2);
+            vr.shocktimes = vr.shocktimes + normrnd(3,1)*10*i;
+            vr.sessionData.stressShocks = [vr.sessionData.stressShocks, vr.shocktimes];
+        end
     elseif strcmp(vr.session.experiment, 'trial')
         vr.shockCount = 0;
     end
@@ -119,11 +120,11 @@ function vr = runtimeCodeFun(vr)
     % start the stress protocol
     if strcmp(vr.session.experiment, 'stress')
         if vr.stressOn && ~vr.waitOn
-            if vr.shockCount < length(vr.shockCount) && vr.timeElapsed - vr.startTime > vr.shocktimes(vr.shockCount)
+             if vr.shockCount < length(vr.sessionData.stressShocks) && vr.timeElapsed - vr.startTime > vr.sessionData.stressShocks(vr.shockCount)
                 if vr.session.serial
-                    arduinoWriteMsg(vr.arduino_serial, 'Q');
+                    arduinoWriteMsg(vr.arduino_serial, 'P');
                 end
-%                 display('SHOCK')
+                display(vr.shockCount);
                 vr.shockCount = vr.shockCount + 1;
             end
         end
