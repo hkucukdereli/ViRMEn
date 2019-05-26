@@ -3,7 +3,8 @@
 
 #define LED 13
 #define STIM 12
-#define PUNISH 11
+//#define PUNISH 11
+#define PUNISH 13
 #define LICK 10
 
 Encoder myEnc(2,3);
@@ -149,7 +150,7 @@ void loop() {
 
   // Single shock
   if (onPunishQ) {
-    if (onPunishQ && millis() - punishStartQ > 25) {
+    if (onPunishQ && millis() - punishStartQ > 50) {
       digitalWrite(PUNISH, LOW);
       onPunishQ = false;
       }
