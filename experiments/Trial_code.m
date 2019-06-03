@@ -16,11 +16,11 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP31',...
                         'date', '190425',...
                         'run', 1,...
-                        'experiment', 'habituation',... %'habituation' or 'trial' or 'shock' or 'stress'
+                        'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
                         'cueList', struct('stim', 'CueStripe45',...
                                           'neutral','CueStripe135'),...
                         'notes', '',...
-                        'config','debug_cfg');
+                        'config','vrrig_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -36,7 +36,7 @@ function vr = initializationCodeFun(vr)
     vr.session.conditioningDuration = vrconfig.conditioningDuration * 60; % sec
     vr.session.paddingDuration = vrconfig.paddingDuration * 60; % sec
     
-    if strcmp(vr.session.experiment, 'trial') & strcmp(vr.session.experiment, 'stress') & strcmp(vr.session.experiment, 'shock')
+    if strcmp(vr.session.experiment, 'trial') | strcmp(vr.session.experiment, 'stress') | strcmp(vr.session.experiment, 'shock')
         vr.session.positions = vr.exper.userdata.postrack;
         vr.session.cues = {vr.exper.userdata.cuestrack};
         vr.currentCue = vr.exper.userdata.cues(1,1);
@@ -186,16 +186,16 @@ function vr = runtimeCodeFun(vr)
             end
         end
         
-    % only do something if the cue has changed
-    if ~strcmp(vr.previousCue, vr.currentCue)
-        if vr.currentCue == vr.session.cueList.('stim')
-            vr = stimOn(vr);
-        elseif vr.currentCue == vr.session.cueList.('neutral')
-            vr = stimOff(vr);
+        % only do something if the cue has changed
+        if ~strcmp(vr.previousCue, vr.currentCue)
+            if vr.currentCue == vr.session.cueList.('stim')
+                vr = stimOn(vr);
+            elseif vr.currentCue == vr.session.cueList.('neutral')
+                vr = stimOff(vr);
+            end
+            % update the previous cue because the cue has changed
+            vr.previousCue = vr.currentCue;
         end
-        % update the previous cue because the cue has changed
-        vr.previousCue = vr.currentCue;
-    end
         
         % see if the position is at the start of the overlap
         if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps)
@@ -249,14 +249,14 @@ function vr = runtimeCodeFun(vr)
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
-    vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
-    vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     % log the time in case the user escaped
     if ~vr.endTime & vr.sessionData.startTime & ~strcmp(vr.session.experiment, 'habituation')
         vr.sessionData.endTime = vr.timeElapsed;
         % turne the stim off in case the user escaped and log it
         vr = stimOff(vr);
     end
+    vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
+    vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     
     sessionData = vr.sessionData;
     session = vr.session;
