@@ -4,17 +4,25 @@ function exper = createTrials(experName, templateName, varargin)
     p = inputParser;
     addOptional(p, 'movement', @moveForward);
     addOptional(p, 'transformation', @transformPerspectiveMex);
-    addOptional(p, 'experiment', @TrialStim);
+    addOptional(p, 'experiment', @Trial_code);
     addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
+    addOptional(p, 'atrandom', false);
     addOptional(p, 'nWorlds', 10);
     addOptional(p, 'overlap', 4);
     addOptional(p, 'arenaL', 5000);
     addOptional(p, 'cueL', 500);
     addOptional(p, 'save', true);
     addOptional(p, 'shuffle', 20);
+    addOptional(p, 'shock', false);
     parse(p, varargin{:});
     p = p.Results;
     
+    if p.atrandom
+        if round(rand)
+            p.cueList = flip(p.cueList);
+        end
+    end
+
     window = round(p.arenaL / p.cueL);
     if p.shuffle < window
         p.shuffle = window;
@@ -34,12 +42,14 @@ function exper = createTrials(experName, templateName, varargin)
     end
     figure;hold on;histogram(lenArr);
     
-    mineLenArr = lenArr;
-    for kl=1:length(lenArr)
-        mineLenArr(kl) = lenArr(kl)*round(rand(1), 2);
+    if p.shock
+        mineLenArr = lenArr;
+        for kl=1:length(lenArr)
+            mineLenArr(kl) = lenArr(kl)*round(rand(1), 2);
+        end
+        mineArr = [0, lenArr(1:end-1)] + mineLenArr;
+        mineArr = cumsum(mineArr);
     end
-    mineArr = [0, lenArr(1:end-1)] + mineLenArr;
-    mineArr = cumsum(mineArr);
 
 %     lenArr = repmat(lenArr, [1, p.nWorlds]);
     n_start = 1;
@@ -80,7 +90,9 @@ function exper = createTrials(experName, templateName, varargin)
     exper.userdata.overlaps = p.overlap;
     exper.userdata.positions = posArr;
     exper.userdata.postrack = lenArr;
-    exper.userdata.minepos = mineArr;
+    if p.shock
+        exper.userdata.minepos = mineArr;
+    end
     % set antialiasing to 6 at minimum
     if temp.exper.windows{1}.antialiasing < 6
         exper.windows{1}.antialiasing = 6;
