@@ -1,5 +1,5 @@
-function code = Habituation
-% Habituation   Code for the ViRMEn experiment tennisCourt.
+function code = Habituation_code
+% Habituation_code   Code for the ViRMEn experiment tennisCourt.
 % code = Conditioning   Returns handles to the functions that ViRMEn
 % executes during engine initialization, runtime and termination.
 
@@ -32,7 +32,8 @@ function vr = initializationCodeFun(vr)
                         'training', vr.training,...
                         'imaging', vr.imaging);
                     
-    vr.sessionData = struct('startTime', now(),...
+    vr.sessionData = struct('startTime', 0,...
+                            'endTime', 0,...
                             'position',[],...
                             'velocity', [],...
                             'nTrials', 0);
@@ -61,6 +62,10 @@ function vr = runtimeCodeFun(vr)
 
     % Press space to start
     if vr.waitOn & vr.keyPressed == 32
+        % log the start time
+        vr.startTime = vr.timeElapsed;
+        vr.trialInfo.startTime = vr.startTime;
+        
         vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
         vr.session.inTrial = true;
         vr.session.blackOut = false;
@@ -117,8 +122,10 @@ function vr = runtimeCodeFun(vr)
     vr.sessionData.velocity = [vr.sessionData.velocity, vr.velocity(2)];
 
     if vr.sessionData.nTrials > vr.session.trials
-        vr = terminationCodeFun(vr);
+        vr.endTime = vr.timeElapsed;
+        vr.experimentEnded = 1;
     end
+    
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
@@ -128,8 +135,12 @@ function vr = terminationCodeFun(vr)
 %     assignin('base', 'trialInfo', vr.trialInfo);
 %     assignin('base', 'vr', vr);
 
+    if vr.endTime
+        vr.sessionData.endTime = vr.endTime;
+    end
     sessionData = vr.sessionData;
     trialInfo = vr.trialInfo;
+    session = vr.session;
     save(sprintf('data/%s_%s_%i_%s.mat', vr.session.mouse, vr.session.date, vr.session.run, vr.session.experiment),...
         'sessionData', 'trialInfo');
     if vr.session.serial

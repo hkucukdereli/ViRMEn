@@ -20,7 +20,7 @@ function vr = initializationCodeFun(vr)
                         'date', '190425',...
                         'run', 1,...
                         'rig', 'VR_training',...
-                        'experiment', 'shock',... %'trial' or 'shock' or 'stress'
+                        'experiment', 'shock',... % 'trial' or 'shock' or 'stress'
                         'basedir', '',...
                         'trialDuration', 60*60,...
                         'timeout', 60,...
@@ -115,13 +115,13 @@ function vr = runtimeCodeFun(vr)
         if vr.currentCue == vr.session.cueList.('stim')
             vr.onStim = true;
             if vr.session.serial
-                vr.sessionData.stimon = [vr.sessionData.stimon, vr.timeElapsed];
+                vr.sessionData.stimon = [vr.sessionData.stimon, [vr.timeElapsed, vr.position(2)]];
                 arduinoWriteMsg(vr.arduino_serial, 'S');
             end
         elseif vr.currentCue == vr.session.cueList.('neutral')
             vr.onStim = false;
             if vr.session.serial
-                vr.sessionData.stimoff = [vr.sessionData.stimoff, vr.timeElapsed];
+                vr.sessionData.stimoff = [vr.sessionData.stimoff, [vr.timeElapsed, vr.position(2)]];
                 arduinoWriteMsg(vr.arduino_serial, 'O');
             end
         end
@@ -140,7 +140,7 @@ function vr = runtimeCodeFun(vr)
         end
     end
 
-    if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps )
+    if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps)
         % stop all movement until we can figure out what to do
         vr.dp(:) = 0;
         % get the latest position to keep the position info continuous
@@ -166,13 +166,13 @@ function vr = runtimeCodeFun(vr)
         if vr.currentCue == vr.session.cueList.('stim')
             vr.onStim = true;
             if vr.session.serial
-                vr.sessionData.stimon = [vr.sessionData.stimon, vr.timeElapsed];
+                vr.sessionData.stimon = [vr.sessionData.stimon, [vr.timeElapsed, vr.position(2)]];
                 arduinoWriteMsg(vr.arduino_serial, 'S');
             end
         elseif vr.currentCue == vr.session.cueList.('neutral')
             vr.onStim = false;
             if vr.session.serial
-                vr.sessionData.stimoff = [vr.sessionData.stimoff, vr.timeElapsed];
+                vr.sessionData.stimoff = [vr.sessionData.stimoff, [vr.timeElapsed, vr.position(2)]];
                 arduinoWriteMsg(vr.arduino_serial, 'O');
             end
         end

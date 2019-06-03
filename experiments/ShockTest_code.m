@@ -1,5 +1,5 @@
-function code = ShockTest
-% ShockTest   Code for the ViRMEn experiment tennisCourt.
+function code = ShockTest_code
+% ShockTest_code   Code for the ViRMEn experiment tennisCourt.
 % code = Conditioning   Returns handles to the functions that ViRMEn
 % executes during engine initialization, runtime and termination.
 
