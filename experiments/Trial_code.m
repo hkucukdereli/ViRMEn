@@ -16,11 +16,11 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP31',...
                         'date', '190425',...
                         'run', 1,...
-                        'experiment', 'habituation',... %'habituation' or 'trial' or 'shock' or 'stress'
+                        'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
                         'cueList', struct('nostim', 'CueStripe45',... % options: stim, nostim or neutral
                                           'neutral','CueStripe135'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -37,8 +37,8 @@ function vr = initializationCodeFun(vr)
     vr.session.paddingDuration = vrconfig.paddingDuration * 60; % sec
     
     if strcmp(vr.session.experiment, 'trial') | strcmp(vr.session.experiment, 'stress') | strcmp(vr.session.experiment, 'shock')
-        vr.session.positions = vr.exper.userdata.postrack;
-        vr.session.cues = {vr.exper.userdata.cuestrack};
+        vr.session.cuelengths = vr.exper.userdata.postrack;
+        vr.session.cuetypes = vr.exper.userdata.cuestrack;
         vr.currentCue = vr.exper.userdata.cues(1,1);
         vr.previousCue = vr.exper.userdata.cues(1,2);
     end
@@ -111,10 +111,12 @@ function vr = initializationCodeFun(vr)
 function vr = runtimeCodeFun(vr)
 
     vr = logData(vr);
-
+    
     % wait starts
     if vr.state.onWait
         vr.position(2) = vr.initPos(2);
+%         if vr.state.onKey & vr.keyPressed
+%         end
     end
     if vr.state.onWait & vr.keyPressed == 32
         % log the start time
@@ -182,13 +184,13 @@ function vr = runtimeCodeFun(vr)
         for p=1:length(vr.positions)-1
             if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
                 vr.currentCue = vr.cuelist(p); 
-                vr.cueid = p;
+                vr.cueid = p + (vr.currentWorld-1) * length(vr.positions) - vr.exper.userdata.overlaps;
             end
         end
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
-            if vr.currentCue == vr.session.cueList.('stim')
+            if all(strcmp(fieldnames(vr.session.cueList), 'stim')) & vr.currentCue == vr.session.cueList.('stim')
                 vr = stimOn(vr);
             elseif vr.currentCue == vr.session.cueList.('neutral') | vr.currentCue == vr.session.cueList.('nostim')
                 vr = stimOff(vr);
