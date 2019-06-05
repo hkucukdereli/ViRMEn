@@ -20,7 +20,7 @@ function vr = initializationCodeFun(vr)
                         'cueList', struct('neutral', 'CueStripe45',... % options: stim, nostim or neutral
                                           'stim','CueStripe135'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -190,18 +190,24 @@ function vr = runtimeCodeFun(vr)
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
-            if all(strcmp(fieldnames(vr.session.cueList), 'stim'))
+            if any(strcmp(fieldnames(vr.session.cueList), 'stim'))
+                display('stim');
                 if vr.currentCue == vr.session.cueList.('stim')
                     vr = stimOn(vr);
-                    display("on");
                 end
-            elseif vr.currentCue == vr.session.cueList.('neutral')
-                vr = stimOff(vr);
-            elseif all(strcmp(fieldnames(vr.session.cueList), 'nostim'))
+            elseif any(strcmp(fieldnames(vr.session.cueList), 'nostim'))
+                display('nostim');
                 if vr.currentCue == vr.session.cueList.('nostim')
                     vr = stimOff(vr);
                 end
             end
+            if any(strcmp(fieldnames(vr.session.cueList), 'neutral'))
+                display('neutral');
+                if vr.currentCue == vr.session.cueList.('neutral')
+                    vr = stimOff(vr);
+                end
+            end
+
             % update the previous cue because the cue has changed
             vr.previousCue = vr.currentCue;
         end
