@@ -13,14 +13,14 @@ code.termination = @terminationCodeFun;
 
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr) 
-    vr.session = struct('mouse', 'TP31',...
-                        'date', '190425',...
+    vr.session = struct('mouse', 'RE29',...
+                        'date', '190605',...
                         'run', 1,...
                         'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
-                        'cueList', struct('nostim', 'CueStripe45',... % options: stim, nostim or neutral
-                                          'neutral','CueStripe135'),...
+                        'cueList', struct('neutral', 'CueStripe45',... % options: stim, nostim or neutral
+                                          'stim','CueStripe135'),...
                         'notes', '',...
-                        'config','debug_cfg');
+                        'config','vrrig_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -190,10 +190,17 @@ function vr = runtimeCodeFun(vr)
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
-            if all(strcmp(fieldnames(vr.session.cueList), 'stim')) & vr.currentCue == vr.session.cueList.('stim')
-                vr = stimOn(vr);
-            elseif vr.currentCue == vr.session.cueList.('neutral') | vr.currentCue == vr.session.cueList.('nostim')
+            if all(strcmp(fieldnames(vr.session.cueList), 'stim'))
+                if vr.currentCue == vr.session.cueList.('stim')
+                    vr = stimOn(vr);
+                    display("on");
+                end
+            elseif vr.currentCue == vr.session.cueList.('neutral')
                 vr = stimOff(vr);
+            elseif all(strcmp(fieldnames(vr.session.cueList), 'nostim'))
+                if vr.currentCue == vr.session.cueList.('nostim')
+                    vr = stimOff(vr);
+                end
             end
             % update the previous cue because the cue has changed
             vr.previousCue = vr.currentCue;
