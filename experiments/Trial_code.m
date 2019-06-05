@@ -55,6 +55,7 @@ function vr = initializationCodeFun(vr)
                       'onStress', false,...
                       'onPadding', false,...
                       'onTrial', false,...
+                      'onStim', false,...
                       'onHabituation', false,...
                       'onBlackOut', false);
 
@@ -66,6 +67,7 @@ function vr = initializationCodeFun(vr)
                             'timestamp', [],...
                             'stimon', [],...
                             'stimoff', [],...
+                            'timeout',[],...
                             'cueid', [],...
                             'cuetype',[],...
                             'shockTime', [],...
@@ -93,6 +95,7 @@ function vr = initializationCodeFun(vr)
     vr.startTime = 0;
     vr.endTime = 0;
     vr.stressTime = 0;
+    vr.stimTime = 0;
     
     vr.paddingCount = 0;
     
@@ -176,6 +179,13 @@ function vr = runtimeCodeFun(vr)
     
     % trial start
     if vr.state.onTrial
+        % see if time out is needed
+        if vr.state.onStim & vr.state.onTimeout & vr.session.timeoutDuration & vr.timeElapsed - vr.stimTime >= vr.session.timeoutDuration
+            vr.state.onTimeout = false;
+            vr = timeOut(vr);
+            vr.stimTime = 0;
+        end
+
         % update the position and cue lists
         vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
         vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
@@ -184,26 +194,28 @@ function vr = runtimeCodeFun(vr)
         for p=1:length(vr.positions)-1
             if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
                 vr.currentCue = vr.cuelist(p); 
-                vr.cueid = p + (vr.currentWorld-1) * length(vr.positions) - vr.exper.userdata.overlaps;
+                vr.cueid = p + ((vr.currentWorld-1) * (length(vr.positions) - vr.exper.userdata.overlaps));
             end
         end
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
             if any(strcmp(fieldnames(vr.session.cueList), 'stim'))
-                display('stim');
                 if vr.currentCue == vr.session.cueList.('stim')
+                    vr.state.onStim = true;
+                    vr.state.onTimeout = true;
                     vr = stimOn(vr);
+                    vr.stimTime = vr.timeElapsed;
                 end
             elseif any(strcmp(fieldnames(vr.session.cueList), 'nostim'))
-                display('nostim');
                 if vr.currentCue == vr.session.cueList.('nostim')
+                    vr.state.onStim = false;
                     vr = stimOff(vr);
                 end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'neutral'))
-                display('neutral');
                 if vr.currentCue == vr.session.cueList.('neutral')
+                    vr.state.onStim = false;
                     vr = stimOff(vr);
                 end
             end
