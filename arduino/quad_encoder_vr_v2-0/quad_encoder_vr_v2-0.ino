@@ -127,6 +127,14 @@ void loop() {
       digitalWriteFast(LED_PIN, LOW);
       onStim = false;
       break;
+
+    case 'T':
+      if (debug) {Serial.println(msg);}
+      // Terminate stimulation protocol
+      digitalWriteFast(STIM_PIN, LOW);
+      digitalWriteFast(LED_PIN, LOW);
+      onStim = false;
+      break;
       
     case 'P':
       if (debug) {Serial.println(msg);}
