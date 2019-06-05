@@ -29,7 +29,7 @@ long vel = 0L;
 const int stimFreq = 20; // Hz
 const long stimInterval = 1000L / stimFreq;
 const int stimDur = 1; // sec
-const int stimPer = 3; // sec
+const int stimPer = 1; // sec
 const int pulseWidth = 10; // ms
 
 // timing variables
