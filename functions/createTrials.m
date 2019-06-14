@@ -140,7 +140,8 @@ function exper = createTrials(experName, templateName, varargin)
             wallHeight = str2num(exper.variables.wallHeight);
             arenaL = str2num(exper.variables.arenaL);
             arenaW = str2num(exper.variables.arenaW);
-            wallHeight = str2num(exper.variables.wallHeight);
+
+
             startLocation = temp.exper.worlds{i}.startLocation;
             tempWorld.startLocation = startLocation;
             tempWorld.backgroundColor = temp.exper.worlds{i}.backgroundColor;
@@ -171,7 +172,7 @@ function exper = createTrials(experName, templateName, varargin)
 %         tempWorld.name = cueList{w};
         addWorld(exper, tempWorld);
         exper.worlds{end}.name = sprintf('Arena_%i', w);
-        exper.worlds{end}.userdata = exper.userdata;
+        % exper.worlds{end}.userdata = [];
 %         exper.worlds{w}.name = sprintf('%s', cueList{w});
         % add the arena floor ro the new world
         addObject(exper.worlds{w}, arenaFloor);
