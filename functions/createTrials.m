@@ -16,6 +16,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'save', true);
     addOptional(p, 'shuffle', 20);
     addOptional(p, 'shock', false);
+    addOptional(p, 'tiling', 1);
     parse(p, varargin{:});
     p = p.Results;
     
@@ -187,7 +188,7 @@ function exper = createTrials(experName, templateName, varargin)
             dis = posArr(w, o+1) - posArr(w, o);
             exper.worlds{w}.objects{end}.width = dis;
             exper.worlds{w}.objects{end}.y = repmat(posArr(w, o) + dis*0.5, [2,1]);
-            exper.worlds{w}.objects{end}.tiling = [3    , 3*dis / wallHeight];
+            exper.worlds{w}.objects{end}.tiling = [p.tiling, p.tiling*dis / wallHeight];
         end
     end
     
