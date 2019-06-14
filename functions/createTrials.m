@@ -6,11 +6,13 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'transformation', @transformPerspectiveMex);
     addOptional(p, 'experiment', @Trial_code);
     addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
+    addOptional(p, 'grayCue', {}); 
     addOptional(p, 'atrandom', false);
     addOptional(p, 'nWorlds', 10);
     addOptional(p, 'overlap', 4);
     addOptional(p, 'arenaL', 5000);
     addOptional(p, 'cueL', 500);
+    addOptional(p, 'grayL', 1000);
     addOptional(p, 'save', true);
     addOptional(p, 'shuffle', 20);
     addOptional(p, 'shock', false);
@@ -19,23 +21,38 @@ function exper = createTrials(experName, templateName, varargin)
     
     if p.atrandom
         if round(rand)
-            p.cueList = flip(p.cueList);
+            cueList = flip(p.cueList);
+        else
+            cueList = p.cueList;
         end
     end
 
-    window = round(p.arenaL / p.cueL);
-    if p.shuffle < window
-        p.shuffle = window;
+    if length(p.grayCue)
+        window = round(p.arenaL / (p.cueL + p.grayL));
+        cueList = [p.grayCue, cueList(1), p.grayCue, cueList(2)];
+    else
+        window = round(p.arenaL / p.cueL);
+        cueList = cueList;
     end
-
+    
     if p.shuffle
-        lenArr = [];
-    %     lens = p.cueL + round(exprnd(400, 1, window));
-        for k=1:p.nWorlds/2
-            lens = p.cueL + round(exprnd(150, 1, window));
-            temp = [lens(randperm(length(lens))); lens(randperm(length(lens)))];
-            temp = temp(:)';
-            lenArr = [lenArr, temp];
+        if length(p.grayCue)
+            lenArr = [];
+            for k=1:((p.arenaL * p.nWorlds) / (p.cueL + p.grayL)) * p.shuffle
+                grays = p.grayL + round(exprnd(p.grayL*.2, 1, p.shuffle)); 
+                lens = p.cueL + round(normrnd(p.cueL*.2, 1, p.shuffle));
+                temp = [grays(randperm(length(grays))); lens(randperm(length(lens))); grays(randperm(length(grays))); lens(randperm(length(lens)))];
+                temp = temp(:)';
+                lenArr = [lenArr, temp];
+            end
+        else
+            lenArr = [];
+            for k=1:((p.arenaL * p.nWorlds) / (p.cueL * p.shuffle))
+                lens = p.cueL + round(exprnd(p.cueL*.2, 1, p.shuffle));
+                temp = [lens(randperm(length(lens))); lens(randperm(length(lens)))];
+                temp = temp(:)';
+                lenArr = [lenArr, temp];
+            end
         end
     else
         lenArr = round(normrnd(p.cueL, p.cueL*0.2, 1, window * p.nWorlds));
@@ -71,10 +88,10 @@ function exper = createTrials(experName, templateName, varargin)
     
     % populate the experiment
     exper.name = experName;
-    exper.userdata.cuelist = p.cueList;
+    exper.userdata.cuelist = cueList;
     exper.variables = temp.exper.variables;
     
-    cues = repmat(p.cueList, size(lenArr));
+    cues = repmat(cueList, size(lenArr));
     cues = cues(1, 1:size(lenArr, 2));
     exper.userdata.cuestrack = cues;
     exper.userdata.cues = strings(size(posArr(:,2:end)));
@@ -113,7 +130,7 @@ function exper = createTrials(experName, templateName, varargin)
     % fetch the objects from the template to use later
     worlds = temp.exper.worlds;
     arenaFloor = [];
-    cueWalls = struct(p.cueList{1},[]);
+    cueWalls = struct(cueList{1},[]);
     % create a new template world
     tempWorld = virmenWorld;
     for i=1:length(worlds)
@@ -135,11 +152,11 @@ function exper = createTrials(experName, templateName, varargin)
             end
         else
             % get the cue wall objects
-            for j=1:length(p.cueList)
-                if strcmp(worlds{i}.name, p.cueList{j})
-                    cueWalls.(p.cueList{j}) = temp.exper.worlds{i}.objects{1}.copyItem;
-                elseif strcmp(worlds{i}.name, p.cueList{j})
-                    cueWalls.(p.cueList{j}) = temp.exper.worlds{i}.objects{1}.copyItem;
+            for j=1:length(cueList)
+                if strcmp(worlds{i}.name, cueList{j})
+                    cueWalls.(cueList{j}) = temp.exper.worlds{i}.objects{1}.copyItem;
+                elseif strcmp(worlds{i}.name, cueList{j})
+                    cueWalls.(cueList{j}) = temp.exper.worlds{i}.objects{1}.copyItem;
                 end
             end
         end
@@ -150,11 +167,11 @@ function exper = createTrials(experName, templateName, varargin)
     % add new worlds and each will have a different cue
 	for w=1:p.nWorlds;
         % add a new world
-%         tempWorld.name = p.cueList{w};
+%         tempWorld.name = cueList{w};
         addWorld(exper, tempWorld);
         exper.worlds{end}.name = sprintf('Arena_%i', w);
         exper.worlds{end}.userdata = exper.userdata;
-%         exper.worlds{w}.name = sprintf('%s', p.cueList{w});
+%         exper.worlds{w}.name = sprintf('%s', cueList{w});
         % add the arena floor ro the new world
         addObject(exper.worlds{w}, arenaFloor);
         exper.worlds{w}.objects{end}.height = posArr(w,end);
@@ -162,7 +179,7 @@ function exper = createTrials(experName, templateName, varargin)
         % add the right cue walls to the new world
         for o=1:size(posArr, 2)-1
 %             cueInd = 2 - mod(o, 2);
-%             addObject(exper.worlds{w}, cueWalls.(p.cueList{cueInd}));
+%             addObject(exper.worlds{w}, cueWalls.(cueList{cueInd}));
             
             currentCue = exper.userdata.cues(w, o);
             addObject(exper.worlds{w}, cueWalls.(char(currentCue)));
@@ -170,7 +187,7 @@ function exper = createTrials(experName, templateName, varargin)
             dis = posArr(w, o+1) - posArr(w, o);
             exper.worlds{w}.objects{end}.width = dis;
             exper.worlds{w}.objects{end}.y = repmat(posArr(w, o) + dis*0.5, [2,1]);
-            exper.worlds{w}.objects{end}.tiling = [1, dis / wallHeight];
+            exper.worlds{w}.objects{end}.tiling = [3    , 3*dis / wallHeight];
         end
     end
     
@@ -179,7 +196,7 @@ function exper = createTrials(experName, templateName, varargin)
     
     % save the experiment if needed
     if p.save
-        save(sprintf('./experiments/%s', experName), 'exper');
+        save(sprintf('C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn/experiments/%s', experName), 'exper');
     else
         warning('New experiment is created but not saved.');
     end
