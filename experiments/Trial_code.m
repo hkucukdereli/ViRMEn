@@ -54,6 +54,7 @@ function vr = initializationCodeFun(vr)
     end
 
     vr.state = struct('onWait', true,...
+                      'onKey', false,...
                       'onStress', false,...
                       'onPadding', false,...
                       'onTrial', false,...
@@ -110,7 +111,8 @@ function vr = initializationCodeFun(vr)
     
     vr.waitOn = true;
     
-    fprintf('Press spacebar to start the experiment.\n');
+    fprintf(['Press S to test the shock during the waiting period.\n',...
+            'Press spacebar to start the experiment.\n']);
     
         
         
@@ -122,8 +124,9 @@ function vr = runtimeCodeFun(vr)
     % wait starts
     if vr.state.onWait
         vr.position(2) = vr.initPos(2);
-%         if vr.state.onKey & vr.keyPressed
-%         end
+        if (vr.keyPressed == 83 | vr.keyPressed == 115)
+            arduinoWriteMsg(vr.arduino_serial, 'PP');
+        end
     end
     if vr.state.onWait & vr.keyPressed == 32
         % log the start time
