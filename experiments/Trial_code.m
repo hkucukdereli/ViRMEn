@@ -109,9 +109,9 @@ function vr = initializationCodeFun(vr)
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
     
     vr.waitOn = true;
-    vr.cueid = 1;
     
     fprintf('Press spacebar to start the experiment.\n');
+    
         
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
@@ -310,5 +310,3 @@ function vr = terminationCodeFun(vr)
         arduinoWriteMsg(vr.arduino_serial, 'O');
         terminationForSerial(vr);
     end
-
-
