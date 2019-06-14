@@ -17,10 +17,11 @@ function vr = initializationCodeFun(vr)
                         'date', '190608',...
                         'run', 1,...
                         'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
-                        'cueList', struct('neutral', 'CueStripe45',... % options: stim, nostim or neutral
-                                          'nostim','CueStripe135'),...
+                        'cueList', struct('neutral', 'CueDarkCircle',... % options: stim, nostim or neutral
+                                          'stim','CueLightCircle',...
+                                          'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -57,6 +58,7 @@ function vr = initializationCodeFun(vr)
                       'onPadding', false,...
                       'onTrial', false,...
                       'onStim', false,...
+                      'onITI', false,...
                       'onHabituation', false,...
                       'onBlackOut', false);
 
@@ -68,6 +70,7 @@ function vr = initializationCodeFun(vr)
                             'timestamp', [],...
                             'stimon', [],...
                             'stimoff', [],...
+                            'ition', [],...
                             'timeout',[],...
                             'cuetype',[],...
                             'cueid', [],...
@@ -205,19 +208,29 @@ function vr = runtimeCodeFun(vr)
                 if vr.currentCue == vr.session.cueList.('stim')
                     vr.state.onStim = true;
                     vr.state.onTimeout = true;
+                    vr.state.onITI = false;
                     vr = stimOn(vr);
                     vr.stimTime = vr.timeElapsed;
                 end
             elseif any(strcmp(fieldnames(vr.session.cueList), 'nostim'))
                 if vr.currentCue == vr.session.cueList.('nostim')
                     vr.state.onStim = false;
+                    vr.state.onITI = false;
                     vr = stimOff(vr);
                 end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'neutral'))
                 if vr.currentCue == vr.session.cueList.('neutral')
                     vr.state.onStim = false;
+                    vr.state.onITI = false;
                     vr = stimOff(vr);
+                end
+            end
+            if any(strcmp(fieldnames(vr.session.cueList), 'gray'))
+                if vr.currentCue == vr.session.cueList.('gray')
+                    vr.state.onStim = false;
+                    vr.state.onITI = true;
+                    vr = ITIon(vr);
                 end
             end
 
