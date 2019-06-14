@@ -197,7 +197,8 @@ function exper = createTrials(experName, templateName, varargin)
     
     % save the experiment if needed
     if p.save
-        save(sprintf('C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn/experiments/%s', experName), 'exper');
+        % save(sprintf('D:/User Folders/Hakan/personal_share/Dropbox/AndermannLab/code/Matlab/ViRMEn/experiments/%s', experName), 'exper');
+        save(sprintf('%s.mat', experName), 'exper');
     else
         warning('New experiment is created but not saved.');
     end
