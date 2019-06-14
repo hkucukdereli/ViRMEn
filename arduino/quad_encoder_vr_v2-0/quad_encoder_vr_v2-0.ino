@@ -60,8 +60,9 @@ unsigned int rewardPulse = 100; // ms. Single reward trigger pulse.
 unsigned int rewardITI = 100; // ms. Reward iti.
 unsigned int rewardCount = 0;
 
-// debug mode
+// debug or test mode
 bool debug = false;
+bool vrtest = false;
 
 void setup()
 {
@@ -93,7 +94,8 @@ void loop() {
   // speed estimation block starts
   if (!onPulse && currentMillis - previousMillis >= interval - pulseDur) {
     previousMillis = currentMillis;
-    vel = ((pos - prevPos) * 1000) / interval;
+    if (vrtest) {vel = 100;}
+    else {vel = ((pos - prevPos) * 1000) / interval;}
     b = (byte *) &vel;
     Serial.write(b, 4);
     digitalWriteFast(CAM_PIN, HIGH); // trigger the camera
