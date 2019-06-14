@@ -7,6 +7,9 @@ function velocity = moveWithQuadEncoder(vr)
     vr.arduino_data = val;
     
     % Update velocity
-    velocity = [0 vr.arduino_data*cos(vr.position(4)) 0 0];
+    if ~isfield(vr,'scaling')
+        vr.scaling = 2;
+    end
+    velocity(2) = vr.arduino_data*cos(vr.position(4)) * vr.scaling;
 
 end
