@@ -21,7 +21,7 @@ function vr = initializationCodeFun(vr)
                                           'stim','CueLightCircle',...
                                           'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -111,7 +111,7 @@ function vr = initializationCodeFun(vr)
     vr.waitOn = true;
     
     fprintf('Press spacebar to start the experiment.\n');
-    
+    vr.exper.worlds{1,vr.currentWorld}.startLocation = [0,5,10,0];
         
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
@@ -261,6 +261,7 @@ function vr = runtimeCodeFun(vr)
             else
                 % advance the world and initialize the position
                 vr.currentWorld = round(vr.currentWorld) + 1;
+                vr.exper.worlds{1,vr.currentWorld}.startLocation = [0,5,10,0];
                 vr.position(2) = 0;
             end
         end
