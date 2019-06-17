@@ -296,11 +296,12 @@ function vr = terminationCodeFun(vr)
     % log the time in case the user escaped
     if ~vr.endTime & vr.sessionData.startTime & ~strcmp(vr.session.experiment, 'habituation')
         vr.sessionData.endTime = vr.timeElapsed;
-        % turne the stim off in case the user escaped and log it
+        % turn the stim off in case the user escaped and log it
         vr = stimOff(vr);
     end
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
+    vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
     
     sessionData = vr.sessionData;
     session = vr.session;
