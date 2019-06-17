@@ -61,7 +61,8 @@ function vr = initializationCodeFun(vr)
                       'onStim', false,...
                       'onITI', false,...
                       'onHabituation', false,...
-                      'onBlackOut', false);
+                      'onBlackOut', false,...
+                      'onCalibration', false);
 
     vr.sessionData = struct('startTime', 0,...
                             'endTime', 0,...
@@ -169,6 +170,29 @@ function vr = runtimeCodeFun(vr)
     end
     % padding block ends
     
+    % calibration starts
+    if strcmp(vr.session.experiment, 'calibration')
+        vr.state.onCalibration = true;        
+        % update the position and cue lists
+        vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
+        vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
+        
+        % find out the position falls into which cue
+        for p=1:length(vr.positions)-1
+            if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
+                vr.currentCue = vr.cuelist(p);
+                vr.cueid = p + ((vr.currentWorld-1) * (length(vr.positions) - vr.exper.userdata.overlaps));
+            end
+        end
+        
+        % only do something if the cue has changed
+        if ~strcmp(vr.previousCue, vr.currentCue)
+        % check for the overlap to decide if it needs teleporting or
+        % terminating
+        vr = overlapCheck(vr);
+    end
+    % calibration block ends
+    
     % stress starts
     if vr.state.onStress
 %         vr.position(2) = vr.initPos(2);
@@ -241,32 +265,9 @@ function vr = runtimeCodeFun(vr)
             vr.previousCue = vr.currentCue;
         end
         
-        % see if the position is at the start of the overlap
-        if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps)
-            % stop all movement until we can figure out what to do
-            vr.dp(:) = 0;
-            % get the latest position to keep the position info continuous
-            vr.lastPos = vr.lastPos + vr.position(2);
-            % advance the world unless it's in the last one. 
-            % otherwise, teminate the experiment gracefully
-            if vr.currentWorld + 1 > vr.exper.userdata.nWorlds
-                % make the worlds invisible
-                vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
-                % turn the stim off and log
-                vr = stimOff(vr);
-                
-                % move to the padding block
-                vr.state.onTrial = false;
-                vr = stimOff(vr);
-                vr.endTime = vr.timeElapsed;
-                vr.sessionData.endTime = vr.timeElapsed;
-                vr = startPadding(vr);
-            else
-                % advance the world and initialize the position
-                vr.currentWorld = round(vr.currentWorld) + 1;
-                vr.position(2) = 0;
-            end
-        end
+        % check for the overlap to decide if it needs teleporting or
+        % terminating
+        vr = overlapCheck(vr);
     end
     
     if vr.state.onTrial & vr.timeElapsed - vr.startTime >= vr.session.trialDuration
