@@ -40,8 +40,8 @@ function exper = createTrials(experName, templateName, varargin)
         if length(p.grayCue)
             lenArr = [];
             for k=1:((p.arenaL * p.nWorlds) / (p.cueL + p.grayL)) * p.shuffle
-                grays = p.grayL + round(exprnd(p.grayL*.2, 1, p.shuffle)); 
-                lens = p.cueL + round(normrnd(p.cueL*.5, 1, p.shuffle));
+                grays = p.grayL + zeros(1, p.shuffle); 
+                lens = p.cueL + zeros(1, p.shuffle);
                 temp = [grays(randperm(length(grays))); lens(randperm(length(lens))); grays(randperm(length(grays))); lens(randperm(length(lens)))];
                 temp = temp(:)';
                 lenArr = [lenArr, temp];
@@ -49,7 +49,7 @@ function exper = createTrials(experName, templateName, varargin)
         else
             lenArr = [];
             for k=1:((p.arenaL * p.nWorlds) / (p.cueL * p.shuffle))
-                lens = p.cueL + round(exprnd(p.cueL*.2, 1, p.shuffle));
+                lens = p.cueL + zeros(1, p.shuffle);
                 temp = [lens(randperm(length(lens))); lens(randperm(length(lens)))];
                 temp = temp(:)';
                 lenArr = [lenArr, temp];
@@ -94,15 +94,12 @@ function exper = createTrials(experName, templateName, varargin)
     
     cues = repmat(cueList, size(lenArr));
     cues = cues(1, 1:size(lenArr, 2));
-    cueids = [1:size(cues,2)];
     exper.userdata.cuestrack = cues;
     exper.userdata.cues = strings(size(posArr(:,2:end)));
-    exper.userdata.cueids = zeros(size(posArr(:,2:end)));
     n_start = 1;
     n_end = window;
     for i=1:p.nWorlds
         exper.userdata.cues(i,:) = cues(n_start : n_end);
-        exper.userdata.cueids(i,:) = cueids(n_start : n_end);
         n_start = n_start + window - p.overlap;
         n_end = n_end + window - p.overlap;
     end

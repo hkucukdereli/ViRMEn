@@ -41,6 +41,7 @@ function vr = initializationCodeFun(vr)
     if strcmp(vr.session.experiment, 'trial') | strcmp(vr.session.experiment, 'stress') | strcmp(vr.session.experiment, 'shock')
         vr.session.cuelengths = vr.exper.userdata.postrack;
         vr.session.cuetypes = vr.exper.userdata.cuestrack;
+        vr.session.cueids = vr.exper.userdata.cueids;
         vr.currentCue = vr.exper.userdata.cues(1,1);
         vr.previousCue = vr.exper.userdata.cues(1,2);
     end
@@ -197,19 +198,19 @@ function vr = runtimeCodeFun(vr)
         % update the position and cue lists
         vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
         vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
+        vr.cueids = vr.exper.userdata.cueids(vr.currentWorld,:);
 
         % find out which cue the position falls into
         for p=1:length(vr.positions)-1
             if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
                 vr.currentCue = vr.cuelist(p); 
+                vr.cueid = vr.cueids(p);
                 % vr.cueid = p + ((vr.currentWorld-1) * (length(vr.positions) - vr.exper.userdata.overlaps));
             end
         end
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
-            vr.cueid = vr.cueid + 1;
-            display(vr.cueid);
             if any(strcmp(fieldnames(vr.session.cueList), 'stim'))
                 if vr.currentCue == vr.session.cueList.('stim')
                     vr.state.onStim = true;
