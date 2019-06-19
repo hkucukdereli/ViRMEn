@@ -94,12 +94,14 @@ function exper = createTrials(experName, templateName, varargin)
     
     cues = repmat(cueList, size(lenArr));
     cues = cues(1, 1:size(lenArr, 2));
+    cueids = [1:size(lenArr, 2)];
     exper.userdata.cuestrack = cues;
     exper.userdata.cues = strings(size(posArr(:,2:end)));
     n_start = 1;
     n_end = window;
     for i=1:p.nWorlds
         exper.userdata.cues(i,:) = cues(n_start : n_end);
+        exper.userdata.cueids(i,:) = cueids(n_start : n_end);
         n_start = n_start + window - p.overlap;
         n_end = n_end + window - p.overlap;
     end

@@ -102,6 +102,7 @@ function vr = initializationCodeFun(vr)
     vr.stressTime = 0;
     vr.stimTime = 0;
     
+    vr.cueid = 0;
     vr.paddingCount = 0;
     
     vr.initPos = vr.worlds{vr.currentWorld}.startLocation;
@@ -112,7 +113,7 @@ function vr = initializationCodeFun(vr)
     vr.waitOn = true;
     
     fprintf(['Press S to test the shock during the waiting period.\n',...
-            'Press spacebar to start the experiment.\n']);
+             'Press spacebar to start the experiment.\n']);
     
         
         
@@ -197,16 +198,18 @@ function vr = runtimeCodeFun(vr)
         vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
         vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
 
-        % find out the position falls into which cue
+        % find out which cue the position falls into
         for p=1:length(vr.positions)-1
             if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
                 vr.currentCue = vr.cuelist(p); 
-                vr.cueid = p + ((vr.currentWorld-1) * (length(vr.positions) - vr.exper.userdata.overlaps));
+                % vr.cueid = p + ((vr.currentWorld-1) * (length(vr.positions) - vr.exper.userdata.overlaps));
             end
         end
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
+            vr.cueid = vr.cueid + 1;
+            display(vr.cueid);
             if any(strcmp(fieldnames(vr.session.cueList), 'stim'))
                 if vr.currentCue == vr.session.cueList.('stim')
                     vr.state.onStim = true;
