@@ -114,8 +114,6 @@ function vr = initializationCodeFun(vr)
     
     vr.waitOn = true;
     
-    vr.cumdis = normrnd(0, .1, [1,10000]);
-    
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
     
@@ -208,11 +206,13 @@ function vr = runtimeCodeFun(vr)
             if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
                 vr.currentCue = vr.cuelist(p); 
                 vr.cueid = vr.cueids(p);
+                %fprintf('\b');fprintf('%d', vr.cueid);
             end
         end
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
+            fprintf('\n');display(vr.position(2));
             if any(strcmp(fieldnames(vr.session.cueList), 'stim'))
                 if vr.currentCue == vr.session.cueList.('stim')
                     vr.state.onStim = true;
