@@ -40,6 +40,7 @@ function vr = initializationCodeFun(vr)
     
     if strcmp(vr.session.experiment, 'trial') | strcmp(vr.session.experiment, 'stress') | strcmp(vr.session.experiment, 'shock')
         vr.session.cuelengths = vr.exper.userdata.postrack;
+        vr.session.transitions = vr.exper.userdata.postrans;
         vr.session.cuetypes = vr.exper.userdata.cuestrack;
         vr.session.cueids = vr.exper.userdata.cueids;
         vr.currentCue = vr.exper.userdata.cues(1,1);
@@ -112,6 +113,8 @@ function vr = initializationCodeFun(vr)
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
     
     vr.waitOn = true;
+    
+    vr.cumdis = normrnd(0, .1, [1,10000]);
     
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
@@ -205,7 +208,6 @@ function vr = runtimeCodeFun(vr)
             if vr.position(2) > vr.positions(p) & vr.position(2) < vr.positions(p+1)
                 vr.currentCue = vr.cuelist(p); 
                 vr.cueid = vr.cueids(p);
-                % vr.cueid = p + ((vr.currentWorld-1) * (length(vr.positions) - vr.exper.userdata.overlaps));
             end
         end
         
