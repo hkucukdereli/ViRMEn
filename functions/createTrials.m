@@ -26,6 +26,8 @@ function exper = createTrials(experName, templateName, varargin)
         else
             cueList = p.cueList;
         end
+    else
+        cueList = p.cueList;
     end
 
     if length(p.grayCue)
@@ -41,7 +43,7 @@ function exper = createTrials(experName, templateName, varargin)
             lenArr = [];
             for k=1:((p.arenaL * p.nWorlds) / (p.cueL + p.grayL)) * p.shuffle
                 grays = p.grayL + round(exprnd(p.grayL*.2, 1, p.shuffle)); 
-                lens = p.cueL + round(normrnd(p.cueL*.5, 1, p.shuffle));
+                lens = round(normrnd(p.cueL, p.cueL*.1, p.shuffle));
                 temp = [grays(randperm(length(grays))); lens(randperm(length(lens))); grays(randperm(length(grays))); lens(randperm(length(lens)))];
                 temp = temp(:)';
                 lenArr = [lenArr, temp];
@@ -60,6 +62,18 @@ function exper = createTrials(experName, templateName, varargin)
     end
     figure;hold on;histogram(lenArr);
     
+    % adjust for the padding
+    lenArrNew = lenArr;
+    for i=2:2:(length(lenArrNew)-1)
+        e1 = round(normrnd(p.cueL*.1,p.cueL*.01,1));
+        e2 = round(normrnd(p.cueL*.3,p.cueL*.02,1));
+        % e1 = round(f1 * lenArrNew(i));
+        % e2 = round(f2 * lenArrNew(i));
+        lenArrNew(i-1) = lenArrNew(i-1) + e1;
+        lenArrNew(i+1) = lenArrNew(i+1) + e2;
+        lenArrNew(i) = lenArrNew(i) - (e1+e2);
+    end
+
     if p.shock
         mineLenArr = lenArr;
         for kl=1:length(lenArr)
@@ -69,7 +83,6 @@ function exper = createTrials(experName, templateName, varargin)
         mineArr = cumsum(mineArr);
     end
 
-%     lenArr = repmat(lenArr, [1, p.nWorlds]);
     n_start = 1;
     n_end = window;
     posArr = [];
@@ -109,8 +122,9 @@ function exper = createTrials(experName, templateName, varargin)
     
     exper.userdata.nWorlds = p.nWorlds;
     exper.userdata.overlaps = p.overlap;
-    exper.userdata.positions = posArr;
+    % exper.userdata.positions = posArr;
     exper.userdata.postrack = lenArr;
+    exper.userdata.postrans = lenArrNew;
     if p.shock
         exper.userdata.minepos = mineArr;
     end
@@ -195,6 +209,20 @@ function exper = createTrials(experName, templateName, varargin)
             exper.worlds{w}.objects{end}.tiling = [p.tiling, p.tiling*dis / wallHeight];
         end
     end
+    
+    % comment out if there's no padding
+    n_start = 1;
+    n_end = window;
+    posArrNew = [];
+    for i=1:p.nWorlds
+        posArrNew = [posArrNew; [0, cumsum(lenArrNew(n_start : n_end))]];
+        n_start = n_start + window - p.overlap;
+        n_end = n_end + window - p.overlap;
+    end
+    % update the positions array with the padded transitions
+    exper.userdata.positions = posArrNew;
+    
+    exper.userdata.positions_ = posArr;
     
     % update the code
     updateCodeText(exper);
