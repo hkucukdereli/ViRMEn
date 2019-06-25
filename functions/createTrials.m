@@ -64,9 +64,11 @@ function exper = createTrials(experName, templateName, varargin)
     
     % adjust for the padding
     lenArrNew = lenArr;
+    es = [];
     for i=2:2:(length(lenArrNew)-1)
         e1 = round(normrnd(p.cueL*.1,p.cueL*.01,1));
         e2 = round(normrnd(p.cueL*.3,p.cueL*.02,1));
+        es = [es, e1];
         % e1 = round(f1 * lenArrNew(i));
         % e2 = round(f2 * lenArrNew(i));
         lenArrNew(i-1) = lenArrNew(i-1) + e1;
@@ -158,7 +160,6 @@ function exper = createTrials(experName, templateName, varargin)
             arenaL = str2num(exper.variables.arenaL);
             arenaW = str2num(exper.variables.arenaW);
 
-
             startLocation = temp.exper.worlds{i}.startLocation;
             tempWorld.startLocation = startLocation;
             tempWorld.backgroundColor = temp.exper.worlds{i}.backgroundColor;
@@ -195,6 +196,15 @@ function exper = createTrials(experName, templateName, varargin)
         addObject(exper.worlds{w}, arenaFloor);
         exper.worlds{w}.objects{end}.height = posArr(w,end);
         exper.worlds{w}.objects{end}.y = repmat(posArr(w,end)/2, [2,1]);
+
+        % set the start location
+        if w == 1
+            exper.worlds{w}.startLocation = startLocation;
+        else
+            exper.worlds{w}.startLocation = startLocation;
+            % exper.worlds{w}.startLocation(2) = es(w);
+        end
+            
         % add the right cue walls to the new world
         for o=1:size(posArr, 2)-1
 %             cueInd = 2 - mod(o, 2);
