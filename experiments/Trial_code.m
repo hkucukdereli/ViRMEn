@@ -198,6 +198,7 @@ function vr = runtimeCodeFun(vr)
 
         % update the position and cue lists
         vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
+        vr.positions_ = vr.exper.userdata.positions_(vr.currentWorld,:);
         vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
         vr.cueids = vr.exper.userdata.cueids(vr.currentWorld,:);
 
@@ -248,7 +249,7 @@ function vr = runtimeCodeFun(vr)
         end
         
         % see if the position is at the start of the overlap
-        if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps)
+        if vr.position(2) > vr.positions_(end-vr.exper.userdata.overlaps)
             % stop all movement until we can figure out what to do
             vr.dp(:) = 0;
             % get the latest position to keep the position info continuous
