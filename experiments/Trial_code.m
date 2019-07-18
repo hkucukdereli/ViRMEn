@@ -16,12 +16,12 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'RE29',...
                         'date', '190625',...
                         'run', 1,...
-                        'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
+                        'experiment', 'stress',... %'habituation' or 'trial' or 'shock' or 'stress'
                         'cueList', struct('neutral', 'CueDarkCircle',... % options: stim, nostim or neutral
                                           'stim','CueLightCircle',...
                                           'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     run(vr.session.config);
@@ -30,6 +30,8 @@ function vr = initializationCodeFun(vr)
     vr.session.basedir = vrconfig.basedir;
     vr.session.serial = vrconfig.serial;
     vr.session.com = vrconfig.com;
+    vr.session.numTrial = vrconfig.numTrial;
+    vr.session.numStress = vrconfig.numStress;
     vr.session.trialDuration = vrconfig.trialDuration * 60; % sec
     vr.session.stressDuration = vrconfig.stressDuration * 60; % sec
     vr.session.blackoutDuration = vrconfig.blackoutDuration * 60; % sec
@@ -67,7 +69,9 @@ function vr = initializationCodeFun(vr)
 
     vr.sessionData = struct('startTime', 0,...
                             'endTime', 0,...
+                            'trialNum', 0,...
                             'stressTime', 0,...
+                            'trialTime', 0,...
                             'position',[],...
                             'velocity', [],...
                             'timestamp', [],...
@@ -78,7 +82,8 @@ function vr = initializationCodeFun(vr)
                             'cuetype',[],...
                             'cueid', [],...
                             'shockTime', [],...
-                            'shockCount', []);
+                            'shockCount', [],...
+                            'stressShocks', []);
                         
     % initialize the serial
     if vr.session.serial
@@ -91,6 +96,21 @@ function vr = initializationCodeFun(vr)
         vr.shockCount = 1;
     elseif strcmp(vr.session.experiment, 'stress')
         vr.shockCount = 1;
+        % determine the shock times
+        vr.sessionData.stressShocks = struct([]);
+        for s=1:length(vr.session.numStress)
+            vr.shocktimes = cumsum(rand([1,15])/3.2);
+            vr.shocktimes = vr.shocktimes(vr.shocktimes<2);
+            vr.sessionData.stressShocks = vr.shocktimes;
+            vr.shocktimes_ = [];
+            for i=1:(vr.session.stressDuration/30)-1
+                vr.shocktimes = cumsum(rand([1,15])/3.2);
+                vr.shocktimes = vr.shocktimes(vr.shocktimes < 2);
+                vr.shocktimes = vr.shocktimes + normrnd(3,1)*10*i;
+                vr.shocktimes_ = [vr.shocktimes_, vr.shocktimes];
+            end
+            vr.sessionData.stressShocks = vr.shocktimes;
+        end
     elseif strcmp(vr.session.experiment, 'trial')
         vr.shockCount = 0;
     elseif strcmp(vr.session.experiment, 'habituation')
@@ -138,6 +158,7 @@ function vr = runtimeCodeFun(vr)
         % end wait and move to padding block
         vr.state.onWait = false;
         vr = startPadding(vr);
+        fprintf('Experiment starts.\n');
     end
     % wait block ends
     
@@ -156,6 +177,7 @@ function vr = runtimeCodeFun(vr)
             if strcmp(vr.session.experiment, 'trial')
                 vr.sessionData.startTime = vr.startTime;
                 vr = startTrial(vr);
+                fprintf('Trial starts.\n');
             elseif strcmp(vr.session.experiment, 'habituation')
                 vr.sessionData.startTime = vr.startTime;
                 vr = startHabituation(vr);
@@ -165,6 +187,7 @@ function vr = runtimeCodeFun(vr)
             elseif strcmp(vr.session.experiment, 'stress')
                 vr.sessionData.stressTime = vr.startTime;
                 vr.state.onStress = true;
+                fprintf('Stress period starts.\n');
             end
         elseif vr.paddingCount == 2
             vr.experimentEnded = true;
@@ -184,6 +207,7 @@ function vr = runtimeCodeFun(vr)
         vr.state.onStress = false;
         vr.sessionData.startTime = vr.startTime;
         vr = startTrial(vr);
+        fprintf('Trial starts.\n'); 
     end
     % stress block ends
     
