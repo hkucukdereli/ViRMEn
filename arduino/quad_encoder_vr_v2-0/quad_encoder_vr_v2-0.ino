@@ -94,7 +94,7 @@ void loop() {
   // speed estimation block starts
   if (!onPulse && currentMillis - previousMillis >= interval - pulseDur) {
     previousMillis = currentMillis;
-    if (vrtest) {vel = 100;}
+    if (vrtest) {vel = pos;}
     else {vel = ((pos - prevPos) * 1000) / interval;}
     b = (byte *) &vel;
     Serial.write(b, 4);
@@ -225,17 +225,20 @@ void loop() {
     if (onRewardPulse && currentMillis - rewardMillis >= rewardITI) {
           rewardMillis = millis();
           digitalWriteFast(REWARD_PIN, HIGH);
+          digitalWriteFast(LED_PIN, HIGH);
           counter++;
           onRewardPulse = false;
           }
     else if (!onRewardPulse && currentMillis - rewardMillis >= rewardPulse*rewardCount) {
           rewardMillis = millis();
           digitalWriteFast(REWARD_PIN, LOW);
+          digitalWriteFast(LED_PIN, LOW);
           onRewardPulse = true;
           }
     // Terminate pulsing after a single reward delivery
     if (counter > 1) {
       digitalWriteFast(REWARD_PIN, LOW);
+      digitalWriteFast(LED_PIN, LOW);
       rewardCount = 0;
       counter = 0;
       onReward = false;

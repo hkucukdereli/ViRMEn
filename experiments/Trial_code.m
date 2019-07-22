@@ -16,9 +16,9 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'RE29',...
                         'date', '190625',...
                         'run', 1,...
-                        'experiment', 'stress',... %'habituation' or 'trial' or 'shock' or 'stress'
-                        'cueList', struct('neutral', 'CueDarkCircle',... % options: stim, nostim or neutral
-                                          'stim','CueLightCircle',...
+                        'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
+                        'cueList', struct('neutral', 'CueDarkCircle',... % stim, nostim or neutral
+                                          'reward','CueLightCircle',... % stim, reward
                                           'gray', 'CueGray'),...
                         'notes', '',...
                         'config','debug_cfg');
@@ -50,7 +50,7 @@ function vr = initializationCodeFun(vr)
     end
     
     if strcmp(vr.session.experiment, 'shock')
-        if exist vr.exper.userdata.minepos
+        if isfield(vr.exper.userdata, 'minepos')
             vr.session.shockpos = vr.exper.userdata.minepos;
         else
             warning("Shock positions are not given.");
@@ -65,7 +65,8 @@ function vr = initializationCodeFun(vr)
                       'onStim', false,...
                       'onITI', false,...
                       'onHabituation', false,...
-                      'onBlackOut', false);
+                      'onBlackOut', false,...
+                      'onReward', false);
 
     vr.sessionData = struct('startTime', 0,...
                             'endTime', 0,...
@@ -83,7 +84,9 @@ function vr = initializationCodeFun(vr)
                             'cueid', [],...
                             'shockTime', [],...
                             'shockCount', [],...
-                            'stressShocks', []);
+                            'stressShocks', [],...
+                            'reward',[],...
+                            'rewardDelay', []);
                         
     % initialize the serial
     if vr.session.serial
@@ -133,6 +136,13 @@ function vr = initializationCodeFun(vr)
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
     
     vr.waitOn = true;
+    
+    if isfield(vr.exper.userdata, 'rewarddelay')
+        vr.rewardDelay = vr.exper.userdata.rewarddelay; % sec
+    else
+        vr.rewardDelay = 0;
+        fprintf('Reward delay is set to 0 seconds.\n');
+    end
     
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
@@ -213,6 +223,12 @@ function vr = runtimeCodeFun(vr)
     
     % trial start
     if vr.state.onTrial
+        % see if there's reward to be given
+        if vr.state.onReward & vr.timeElapsed - vr.stimTime >= vr.rewardDelay
+            % deliver a pavlovian reward
+            vr = goodMouse(vr, 4);
+            vr.state.onReward = false;
+        end
         % see if time out is needed
         if vr.state.onStim & vr.state.onTimeout & vr.session.timeoutDuration & vr.timeElapsed - vr.stimTime >= vr.session.timeoutDuration
             vr.state.onTimeout = false;
@@ -244,6 +260,7 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onTimeout = true;
                     vr.state.onITI = false;
                     vr = stimOn(vr);
+                    vr.state.onReward = true;
                     vr.stimTime = vr.timeElapsed;
                 end
             elseif any(strcmp(fieldnames(vr.session.cueList), 'nostim'))
@@ -252,12 +269,22 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onITI = false;
                     vr = stimOff(vr);
                 end
+            elseif any(strcmp(fieldnames(vr.session.cueList), 'reward'))
+                if vr.currentCue == vr.session.cueList.('reward')
+                    vr.state.onStim = true;
+                    vr.state.onTimeout = true;
+                    vr.state.onITI = false;
+                    vr = stimOn(vr);
+                    vr.stimTime = vr.timeElapsed;
+                end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'neutral'))
                 if vr.currentCue == vr.session.cueList.('neutral')
                     vr.state.onStim = false;
                     vr.state.onITI = false;
                     vr = stimOff(vr);
+                    vr.state.onReward = true; % send out a reward next cycle
+                    vr.rewardDelay = hist(normrnd(vr.rewardDelay,vr.rewardDelay*.2))% set the reward delay
                 end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'gray'))
@@ -333,6 +360,7 @@ function vr = terminationCodeFun(vr)
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
+    vr.sessionData.reward = reshape(vr.sessionData.reward, 2, []);
     
     sessionData = vr.sessionData;
     session = vr.session;

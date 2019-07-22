@@ -1,6 +1,12 @@
-function vr = goodMouse(vr)
-% sends a message to the serial
-% ends up triggering reward delivery at the Arduino end
-% pulse parameters are set at the Arduino end
-    fprintf(vr.arduino_serial , 'R');
-end
+function vr = goodMouse(vr, rewardNum)
+    % first construct the message
+    rewardMsg = [];
+    for i=1:rewardNum
+        rewardMsg = [rewardMsg, 'R']
+    end
+    % send the message out to arduino
+    if vr.session.serial
+        arduinoWriteMsg(vr.arduino_serial, rewardMsg);
+        vr.sessionData.reward = [vr.sessionData.reward, [vr.timeElapsed, vr.position(2) + vr.lastPos]];
+        vr.sessionData.rewardDelay = [vr.sessionData.rewardDelay, vr.rewardDelay];
+    end

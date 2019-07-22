@@ -17,6 +17,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'shuffle', 20);
     addOptional(p, 'shock', false);
     addOptional(p, 'tiling', 1);
+    addOptional(p, 'rewarddelay', 0);
     parse(p, varargin{:});
     p = p.Results;
     
@@ -107,6 +108,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.userdata.cuelist = cueList;
     exper.variables = temp.exper.variables;
     
+    
     cues = repmat(cueList, size(lenArr));
     cues = cues(1, 1:size(lenArr, 2));
     cueids = [1:size(cues,2)];
@@ -159,6 +161,8 @@ function exper = createTrials(experName, templateName, varargin)
             wallHeight = str2num(exper.variables.wallHeight);
             arenaL = str2num(exper.variables.arenaL);
             arenaW = str2num(exper.variables.arenaW);
+%             wallHeight = 2;
+%             arenaW = 2;
 
             startLocation = temp.exper.worlds{i}.startLocation;
             tempWorld.startLocation = startLocation;
@@ -202,7 +206,7 @@ function exper = createTrials(experName, templateName, varargin)
             exper.worlds{w}.startLocation = startLocation;
         else
             exper.worlds{w}.startLocation = startLocation;
-            % exper.worlds{w}.startLocation(2) = es(w);
+            exper.worlds{w}.startLocation(2) = 0;
         end
             
         % add the right cue walls to the new world

@@ -5,7 +5,7 @@ vrconfig.basedir = 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViR
 
 % Serial communication
 vrconfig.serial = true;
-vrconfig.com = 13;
+vrconfig.com = 34;
 
 % Habituation
 vrconfig.habituationDuration = .2; % min
@@ -22,4 +22,4 @@ vrconfig.paddingDuration = .1   ; % min
 
 % Stress
 vrconfig.numStress = 2;
-vrconfig.stressDuration = .1; % min
+vrconfig.stressDuration = .2; % min
