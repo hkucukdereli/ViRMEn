@@ -30,6 +30,10 @@ function vr = initializationCodeFun(vr)
     vr.session.basedir = vrconfig.basedir;
     vr.session.serial = vrconfig.serial;
     vr.session.com = vrconfig.com;
+    if isfield(vrconfig, 'input_com')
+        vr.session.input_com = vrconfig.input_com;
+        vr.licks = 0;
+    end
     vr.session.numTrial = vrconfig.numTrial;
     vr.session.numStress = vrconfig.numStress;
     vr.session.trialDuration = vrconfig.trialDuration * 60; % sec
@@ -86,12 +90,14 @@ function vr = initializationCodeFun(vr)
                             'shockCount', [],...
                             'stressShocks', [],...
                             'reward',[],...
-                            'rewardDelay', []);
+                            'rewardDelay', [],...
+                            'licks', []);
                         
     % initialize the serial
     if vr.session.serial
         serialFix;
         vr = initializationForSerial(vr, vr.session.com);
+        vr = initializationForSerialInput(vr, vr.session.input_com);
     end
     
     % initialize shock count depending on the experiment
@@ -229,6 +235,15 @@ function vr = runtimeCodeFun(vr)
             vr = goodMouse(vr, 4);
             vr.state.onReward = false;
         end
+        % listen to licks during trial
+        % Read data from Serial
+        val = arduinoReadQuad(vr.arduino_serial_input);
+        if val > 0
+            display('Lick');
+            vr.licks = vr.licks + 1;
+            vr.sessionData.licks = [vr.sessionData.licks, [vr.licks, vr.timeElapsed]];
+        end
+    
         % see if time out is needed
         if vr.state.onStim & vr.state.onTimeout & vr.session.timeoutDuration & vr.timeElapsed - vr.stimTime >= vr.session.timeoutDuration
             vr.state.onTimeout = false;
@@ -253,7 +268,7 @@ function vr = runtimeCodeFun(vr)
         
         % only do something if the cue has changed
         if ~strcmp(vr.previousCue, vr.currentCue)
-            fprintf('\n');display(vr.position(2));
+            % fprintf('\n');display(vr.position(2));
             if any(strcmp(fieldnames(vr.session.cueList), 'stim'))
                 if vr.currentCue == vr.session.cueList.('stim')
                     vr.state.onStim = true;
@@ -284,7 +299,7 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onITI = false;
                     vr = stimOff(vr);
                     vr.state.onReward = true; % send out a reward next cycle
-                    vr.rewardDelay = hist(normrnd(vr.rewardDelay,vr.rewardDelay*.2))% set the reward delay
+                    vr.rewardDelay = hist(normrnd(vr.rewardDelay,vr.rewardDelay*.2)); % set the reward delay
                 end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'gray'))
@@ -361,6 +376,7 @@ function vr = terminationCodeFun(vr)
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
     vr.sessionData.reward = reshape(vr.sessionData.reward, 2, []);
+    vr.sessionData.licks = reshape(vr.sessionData.licks, 2, []);
     
     sessionData = vr.sessionData;
     session = vr.session;

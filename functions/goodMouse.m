@@ -2,7 +2,7 @@ function vr = goodMouse(vr, rewardNum)
     % first construct the message
     rewardMsg = [];
     for i=1:rewardNum
-        rewardMsg = [rewardMsg, 'R']
+        rewardMsg = [rewardMsg, 'R'];
     end
     % send the message out to arduino
     if vr.session.serial

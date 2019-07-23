@@ -6,7 +6,7 @@
 #define STIM_PIN 12   // laser trigger pin
 #define PUNISH_PIN 11 // shock trigger pin
 #define REWARD_PIN 10 // reward trigger pin
-#define CAM_PIN 9  // camera trigger pin
+#define CAM_PIN 9     // camera trigger pin
 #define LICK_PIN 8    // lick input pin
 
 Encoder myEnc(2,3); // encoder is connected to interrupts 1&2
