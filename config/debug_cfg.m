@@ -6,6 +6,8 @@ vrconfig.basedir = 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViR
 % Serial communication
 vrconfig.serial = true;
 vrconfig.com = 13;
+vrconfig.lick = false;
+vrconfig.input_com = 5;
 
 % Habituation
 vrconfig.habituationDuration = .2; % min
