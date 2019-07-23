@@ -5,17 +5,15 @@ function vr = initializationForSerial(vr)
 %     vr.fid = fopen(filename, 'w');
     
     % --- Initialize and set up serial communication with Arduino ---%
-    if vr.session.serial
-        vr.arduino_data = [];
-        try
-            vr.arduino_serial = arduinoOpen(vr.session.com);
-            fprintf('Arduino is connected to COM%i.\n', vr.session.com);
-        catch
-            fprintf('COM%i is not available or Arduino is not connected. Continuing without serial...\n', com);
-        end
-        if vr.session.lick
-            vr.arduino_serial = arduinoOpen(vr.session.input_com);
-            fprintf('Input device is connected to COM%i.\n', vr.session.input_com);
-        end
+    vr.arduino_data = [];
+    try
+        vr.arduino_serial = arduinoOpen(vr.session.com);
+        fprintf('Arduino is connected to COM%i.\n', vr.session.com);
+    catch
+        fprintf('COM%i is not available or Arduino is not connected. Continuing without serial...\n', vr.session.com);
     end
-end
+    if vr.session.lick
+        vr.arduino_serial_input = arduinoOpen(vr.session.input_com);
+        fprintf('Input device is connected to COM%i.\n', vr.session.input_com);
+    end
+
