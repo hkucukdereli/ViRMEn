@@ -4,3 +4,4 @@ function terminationForSerial(vr)
    
     % Close the open serial port
     arduinoClose(vr.arduino_serial);
+    arduinoClose(vr.arduino_serial_input);
