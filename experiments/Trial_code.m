@@ -125,6 +125,9 @@ function vr = runtimeCodeFun(vr)
 
     vr = logData(vr);
     
+    display(vr.currentCue);
+    display(vr.onStim);
+    
     % wait starts
     if vr.state.onWait
         vr.position(2) = vr.initPos(2);

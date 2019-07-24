@@ -107,7 +107,7 @@ function exper = createTrials(experName, templateName, varargin)
     exper.name = experName;
     exper.userdata.cuelist = cueList;
     exper.variables = temp.exper.variables;
-    
+    exper.userdata.rewarddelay = p.rewarddelay;
     
     cues = repmat(cueList, size(lenArr));
     cues = cues(1, 1:size(lenArr, 2));
