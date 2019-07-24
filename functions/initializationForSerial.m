@@ -16,4 +16,3 @@ function vr = initializationForSerial(vr)
         vr.arduino_serial_input = arduinoOpen(vr.session.input_com);
         fprintf('Input device is connected to COM%i.\n', vr.session.input_com);
     end
-

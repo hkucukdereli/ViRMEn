@@ -16,6 +16,7 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP29',...
                         'date', '190724',...
                         'run', 1,...
+                        'rewardsize', 500,...
                         'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
                         'cueList', struct('neutral', 'CueStripe45',... % stim, nostim or neutral
                                           'reward','CueDarkTri',... % stim, reward
@@ -196,7 +197,7 @@ function vr = runtimeCodeFun(vr)
         % see if there's reward to be given
         if vr.state.onReward & vr.timeElapsed - vr.stimTime >= vr.rewardDelay
             % deliver a pavlovian reward
-            vr = goodMouse(vr, 4);
+            vr = goodMouse(vr, vr.session.rewardsize/100);
             vr.state.onReward = false;
         end
         % listen to licks during trial
