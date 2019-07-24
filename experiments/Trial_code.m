@@ -244,7 +244,8 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onTimeout = true;
                     vr.state.onITI = false;
                     vr = stimOn(vr);
-                    vr.state.onReward = true;
+                    vr.state.onReward = true; % send out a reward next cycle
+                    vr.rewardDelay = hist(normrnd(vr.rewardDelay, vr.rewardDelay*.2)); % set the reward delay
                     vr.stimTime = vr.timeElapsed;
                 end
             end
@@ -253,8 +254,6 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onStim = false;
                     vr.state.onITI = false;
                     vr = stimOff(vr);
-                    vr.state.onReward = true; % send out a reward next cycle
-                    vr.rewardDelay = hist(normrnd(vr.rewardDelay,vr.rewardDelay*.2)); % set the reward delay
                 end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'gray'))
