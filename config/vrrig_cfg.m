@@ -7,7 +7,7 @@ vrconfig.basedir = 'C:/Users/andermann/Documents/MATLAB/ViRMEn';
 vrconfig.serial = true;
 vrconfig.com = 5;
 vrconfig.lick = false;
-vrconfig.com = 6;
+vrconfig.input_com = 6;
 
 % Habituation
 vrconfig.habituationDuration = 60; % min
