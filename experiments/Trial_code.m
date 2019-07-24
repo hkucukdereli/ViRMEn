@@ -13,7 +13,7 @@ code.termination = @terminationCodeFun;
 
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr) 
-    vr.session = struct('mouse', 'TP29',...
+    vr.session = struct('mouse', 'TP00',...
                         'date', '190724',...
                         'run', 1,...
                         'rewardsize', 500,...
@@ -245,8 +245,10 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onITI = false;
                     vr = stimOn(vr);
                     vr.state.onReward = true; % send out a reward next cycle
-                    vr.rewardDelay = hist(normrnd(vr.rewardDelay, vr.rewardDelay*.2)); % set the reward delay
+                    % vr.rewardDelay = hist(normrnd(vr.rewardDelay, vr.rewardDelay*.2)); % set the reward delay
                     vr.stimTime = vr.timeElapsed;
+                else
+                    vr.state.onReward = false; % send out a reward next cycle
                 end
             end
             if any(strcmp(fieldnames(vr.session.cueList), 'neutral'))

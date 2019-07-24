@@ -224,6 +224,8 @@ function exper = createTrials(experName, templateName, varargin)
         end
     end
     
+    exper.userdata.positions_ = posArr;
+    
     % comment out if there's no padding
     n_start = 1;
     n_end = window;
@@ -235,9 +237,7 @@ function exper = createTrials(experName, templateName, varargin)
     end
     % update the positions array with the padded transitions
     exper.userdata.positions = posArrNew;
-    
-    exper.userdata.positions_ = posArr;
-    
+
     % update the code
     updateCodeText(exper);
     
