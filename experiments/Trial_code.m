@@ -17,8 +17,8 @@ function vr = initializationCodeFun(vr)
                         'date', '190625',...
                         'run', 1,...
                         'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
-                        'cueList', struct('neutral', 'CueDarkCircle',... % stim, nostim or neutral
-                                          'reward','CueLightCircle',... % stim, reward
+                        'cueList', struct('neutral', 'CueStripe45',... % stim, nostim or neutral
+                                          'stim','CueDarkTri',... % stim, reward
                                           'gray', 'CueGray'),...
                         'notes', '',...
                         'config','debug_cfg');
@@ -269,7 +269,7 @@ function vr = runtimeCodeFun(vr)
         end
         
         % see if the position is at the start of the overlap
-        if vr.position(2) > vr.positions(end-vr.exper.userdata.overlaps)
+        if vr.position(2) > vr.positions_(end-vr.exper.userdata.overlaps)
             % stop all movement until we can figure out what to do
             vr.dp(:) = 0;
             % get the latest position to keep the position info continuous
