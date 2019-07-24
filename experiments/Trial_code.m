@@ -230,7 +230,6 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onTimeout = true;
                     vr.state.onITI = false;
                     vr = stimOn(vr);
-                    vr.state.onReward = true;
                     vr.stimTime = vr.timeElapsed;
                 end
             elseif any(strcmp(fieldnames(vr.session.cueList), 'nostim'))
@@ -245,6 +244,7 @@ function vr = runtimeCodeFun(vr)
                     vr.state.onTimeout = true;
                     vr.state.onITI = false;
                     vr = stimOn(vr);
+                    vr.state.onReward = true;
                     vr.stimTime = vr.timeElapsed;
                 end
             end
