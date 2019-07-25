@@ -18,6 +18,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'shock', false);
     addOptional(p, 'tiling', 1);
     addOptional(p, 'rewarddelay', 0);
+    addOptional(p, 'padding', false);
     parse(p, varargin{:});
     p = p.Results;
     
@@ -224,19 +225,22 @@ function exper = createTrials(experName, templateName, varargin)
         end
     end
     
-    exper.userdata.positions_ = posArr;
-    
-    % comment out if there's no padding
-    n_start = 1;
-    n_end = window;
-    posArrNew = [];
-    for i=1:p.nWorlds
-        posArrNew = [posArrNew; [0, cumsum(lenArrNew(n_start : n_end))]];
-        n_start = n_start + window - p.overlap;
-        n_end = n_end + window - p.overlap;
+
+    if ~p.padding
+        exper.userdata.positions = posArr;
+    else
+        % comment out if there's no padding
+        n_start = 1;
+        n_end = window;
+        posArrNew = [];
+        for i=1:p.nWorlds
+            posArrNew = [posArrNew; [0, cumsum(lenArrNew(n_start : n_end))]];
+            n_start = n_start + window - p.overlap;
+            n_end = n_end + window - p.overlap;
+        end
+        % update the positions array with the padded transitions
+        exper.userdata.positions = posArrNew;
     end
-    % update the positions array with the padded transitions
-    exper.userdata.positions = posArrNew;
 
     % update the code
     updateCodeText(exper);
