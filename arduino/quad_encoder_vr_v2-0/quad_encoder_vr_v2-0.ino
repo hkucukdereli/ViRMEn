@@ -56,7 +56,7 @@ unsigned int punishITI = 100; // ms. Shock iti.
 unsigned int punishCount = 0;
 
 // reward variables
-unsigned int rewardPulse = 100; // ms. Single reward trigger pulse.
+unsigned int rewardPulse = 600; // ms. Single reward trigger pulse.
 unsigned int rewardITI = 100; // ms. Reward iti.
 unsigned int rewardCount = 0;
 
