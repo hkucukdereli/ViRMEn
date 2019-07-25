@@ -13,16 +13,16 @@ code.termination = @terminationCodeFun;
 
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr) 
-    vr.session = struct('mouse', 'TP00',...
+    vr.session = struct('mouse', 'TP38',...
                         'date', '190724',...
                         'run', 1,...
-                        'rewardsize', 500,...
+                        'rewardsize', 600,...
                         'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
                         'cueList', struct('neutral', 'CueStripe45',... % stim, nostim or neutral
                                           'reward','CueDarkTri',... % stim, reward
                                           'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','debug_cfg');
+                        'config','vrrig_cfg');
     
     % load the variables from the config file
     vr = loadConfig(vr);
@@ -124,9 +124,6 @@ function vr = initializationCodeFun(vr)
 function vr = runtimeCodeFun(vr)
 
     vr = logData(vr);
-    
-    display(vr.currentCue);
-    display(vr.onStim);
     
     % wait starts
     if vr.state.onWait
