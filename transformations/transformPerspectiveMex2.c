@@ -10,7 +10,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int *dims[2];
 
     // Get aspect ratio of window
-    aspectRatio = 3.6;
+    aspectRatio = 2.5;
     
     // viewing parameters
     s = 1;
