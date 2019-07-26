@@ -4,7 +4,7 @@ vrconfig.rig = 'vr_rig';
 vrconfig.basedir = 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn';
 
 % Serial communication
-vrconfig.serial = true;
+vrconfig.serial = false;
 vrconfig.com = 13;
 vrconfig.lick = false;
 vrconfig.input_com = 5;

@@ -22,7 +22,7 @@ function vr = initializationCodeFun(vr)
                                           'reward','CueDarkTri',... % stim, reward
                                           'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     vr = loadConfig(vr);
@@ -63,6 +63,10 @@ function vr = initializationCodeFun(vr)
     if vr.session.serial
         serialFix;
         vr = initializationForSerial(vr);
+    else
+        if isequal(vr.exper.movementFunction, @moveWithQuadEncoder)
+            vr.exper.movementFunction = @moveWithKeyboard;
+        end
     end
     
     % initialize shock count depending on the experiment

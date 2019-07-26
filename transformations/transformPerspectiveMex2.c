@@ -1,15 +1,16 @@
 #include "mex.h"
 #include "math.h"
+#include "matrix.h"
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mwSize ncols, index;
     double *coord3new, *coord3;
     float aspectRatio;
     int s, p, ndims, xSign, zSign;
-    int dims[2];
-    
+    int *dims[2];
+
     // Get aspect ratio of window
-    aspectRatio = 1.8;
+    aspectRatio = 3.6;
     
     // viewing parameters
     s = 1;
