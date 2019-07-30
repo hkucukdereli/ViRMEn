@@ -19,6 +19,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'tiling', 1);
     addOptional(p, 'rewarddelay', 0);
     addOptional(p, 'padding', false);
+    addOptional(p, 'startloc', [0,5,50,0]);
     parse(p, varargin{:});
     p = p.Results;
     
@@ -45,7 +46,8 @@ function exper = createTrials(experName, templateName, varargin)
             lenArr = [];
             for k=1:((p.arenaL * p.nWorlds) / (p.cueL + p.grayL)) * p.shuffle
                 grays = p.grayL + round(exprnd(p.grayL*.2, 1, p.shuffle)); 
-                lens = round(normrnd(p.cueL, p.cueL*.1, p.shuffle));
+                % lens = round(normrnd(p.cueL, p.cueL*.1, p.shuffle));
+                lens = p.cueL + round(exprnd(p.cueL*.2, 1, p.shuffle));
                 temp = [grays(randperm(length(grays))); lens(randperm(length(lens))); grays(randperm(length(grays))); lens(randperm(length(lens)))];
                 temp = temp(:)';
                 lenArr = [lenArr, temp];
@@ -165,7 +167,8 @@ function exper = createTrials(experName, templateName, varargin)
 %             wallHeight = 2;
 %             arenaW = 2;
 
-            startLocation = temp.exper.worlds{i}.startLocation;
+            % startLocation = temp.exper.worlds{i}.startLocation;
+            startLocation = p.startloc;
             tempWorld.startLocation = startLocation;
             tempWorld.backgroundColor = temp.exper.worlds{i}.backgroundColor;
             tempWorld.variables = exper.variables;
