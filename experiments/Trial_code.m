@@ -22,7 +22,7 @@ function vr = initializationCodeFun(vr)
                                           'stim','CueDarkCircle',... % stim, reward
                                           'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     vr = loadConfig(vr);
@@ -322,6 +322,7 @@ function vr = terminationCodeFun(vr)
     
     if vr.session.serial
         % turn the stim off just to be safe
-        arduinoWriteMsg(vr.arduino_serial, 'O');
+        arduinoWriteMsg(vr.arduino_serial, 'O'); % terminate stim in case it was left on for whatever reason
+        arduinoWriteMsg(vr.arduino_serial, 'C'); % disbale cam pulsing
         terminationForSerial(vr);
     end

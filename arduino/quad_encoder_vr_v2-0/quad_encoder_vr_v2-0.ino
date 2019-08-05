@@ -49,6 +49,7 @@ bool onPunish = false;
 bool onPunishPulse = true;
 bool onReward = false;
 bool onRewardPulse = false;
+bool onCam = false;
 
 // punish variables
 unsigned int punishPulse = 50; // ms. Shock trigger pulse.
@@ -91,28 +92,19 @@ void loop() {
   unsigned long currentMillis = millis();
   unsigned long currentTime = now();
 
-  // speed estimation block starts
-  if (!onPulse && currentMillis - previousMillis >= interval - pulseDur) {
-    previousMillis = currentMillis;
-    if (vrtest) {vel = pos;}
-    else {vel = ((pos - prevPos) * 1000) / interval;}
-    b = (byte *) &vel;
-    Serial.write(b, 4);
-    digitalWriteFast(CAM_PIN, HIGH); // trigger the camera
-    prevPos = pos;
-    onPulse = !onPulse;
-    }
-
-  if (onPulse && currentMillis - previousMillis >= pulseDur) {
-    previousMillis = currentMillis;
-    digitalWriteFast(CAM_PIN, LOW);
-    onPulse = !onPulse;
-    }
-  // speed estimation block ends
-  
   // Check the serial for messages  
   char msg = Serial.read();
   switch (msg) {
+    case 'B':
+      if (debug) {Serial.println(msg);}
+      // Enable cam pulsing
+      onCam = true;
+      break
+    case 'C':
+      if (debug) {Serial.println(msg);}
+      // Disable cam pulsing
+      onCam = false;
+      break
     case 'S':
       if (debug) {Serial.println(msg);}
       // Initate stimulation protocol
@@ -159,6 +151,29 @@ void loop() {
     default:
       break;
     }
+    
+  // speed estimation block starts
+  if (!onPulse && currentMillis - previousMillis >= interval - pulseDur) {
+    previousMillis = currentMillis;
+    if (vrtest) {vel = pos;}
+    else {vel = ((pos - prevPos) * 1000) / interval;}
+    b = (byte *) &vel;
+    Serial.write(b, 4);
+    if (onCam) {
+      digitalWriteFast(CAM_PIN, HIGH); // trigger the camera
+    }
+    prevPos = pos;
+    onPulse = !onPulse;
+    }
+
+  if (onPulse && currentMillis - previousMillis >= pulseDur) {
+    previousMillis = currentMillis;
+    if (onCam) {
+      digitalWriteFast(CAM_PIN, LOW); // trigger the camera
+    }
+    onPulse = !onPulse;
+    }
+  // speed estimation block ends
 
   // Stimulation block starts
   // Initiate the stimulation protocol
