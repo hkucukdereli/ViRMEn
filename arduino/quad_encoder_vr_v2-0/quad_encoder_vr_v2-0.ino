@@ -16,7 +16,7 @@ byte *b;
 // sampling variables
 const int sampling = 20;
 const long interval = 1000L / sampling;
-const int pulseDur = 40; // ms
+const int pulseDur = 10; // ms
 
 // position variables
 long pos = 0L;
@@ -71,7 +71,7 @@ void setup()
   pinModeFast(STIM_PIN, OUTPUT);
   pinModeFast(PUNISH_PIN, OUTPUT);
   pinModeFast(REWARD_PIN, OUTPUT);
-  pinModeFast(CAM_PIN, INPUT);
+  pinModeFast(CAM_PIN, OUTPUT);
   pinModeFast(LICK_PIN, INPUT);
 
   Serial.begin(115200);
