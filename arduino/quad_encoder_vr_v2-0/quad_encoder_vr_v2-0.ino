@@ -16,7 +16,7 @@ byte *b;
 // sampling variables
 const int sampling = 20;
 const long interval = 1000L / sampling;
-const int pulseDur = 10; // ms
+const int pulseDur = 40; // ms
 
 // position variables
 long pos = 0L;
@@ -29,7 +29,7 @@ long vel = 0L;
 const int stimFreq = 20; // Hz
 const long stimInterval = 1000L / stimFreq;
 const int stimDur = 1; // sec
-const int stimPer = 1; // sec
+const int stimPer = 3; // sec
 const int pulseWidth = 10; // ms
 
 // timing variables
@@ -99,12 +99,15 @@ void loop() {
       if (debug) {Serial.println(msg);}
       // Enable cam pulsing
       onCam = true;
-      break
+      break;
+      
     case 'C':
       if (debug) {Serial.println(msg);}
       // Disable cam pulsing
       onCam = false;
-      break
+      digitalWriteFast(CAM_PIN, LOW);
+      break;
+      
     case 'S':
       if (debug) {Serial.println(msg);}
       // Initate stimulation protocol
