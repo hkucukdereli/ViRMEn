@@ -23,5 +23,5 @@ vrconfig.timeoutDuration = 0; % sec
 vrconfig.paddingDuration = .01   ; % min
 
 % Stress
-vrconfig.numStress = 2;
-vrconfig.stressDuration = .2; % min
+vrconfig.numStress = 1;
+vrconfig.stressDuration = 5; % min

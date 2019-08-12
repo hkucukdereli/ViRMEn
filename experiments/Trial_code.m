@@ -29,6 +29,7 @@ function vr = initializationCodeFun(vr)
 
     vr.state = struct('onWait', true,...
                       'onKey', false,...
+                      'onCam', false,...
                       'onStress', false,...
                       'onPadding', false,...
                       'onTrial', false,...
@@ -75,20 +76,8 @@ function vr = initializationCodeFun(vr)
     elseif strcmp(vr.session.experiment, 'stress')
         vr.shockCount = 1;
         % determine the shock times
-        vr.sessionData.stressShocks = struct([]);
-        for s=1:length(vr.session.numStress)
-            vr.shocktimes = cumsum(rand([1,15])/3.2);
-            vr.shocktimes = vr.shocktimes(vr.shocktimes<2);
-            vr.sessionData.stressShocks = vr.shocktimes;
-            vr.shocktimes_ = [];
-            for i=1:(vr.session.stressDuration/30)-1
-                vr.shocktimes = cumsum(rand([1,15])/3.2);
-                vr.shocktimes = vr.shocktimes(vr.shocktimes < 2);
-                vr.shocktimes = vr.shocktimes + normrnd(3,1)*10*i;
-                vr.shocktimes_ = [vr.shocktimes_, vr.shocktimes];
-            end
-            vr.sessionData.stressShocks = vr.shocktimes;
-        end
+        vr = initializeShocks(vr);
+        display(vr.sessionData.stressShocks);
     elseif strcmp(vr.session.experiment, 'trial')
         vr.shockCount = 0;
     elseif strcmp(vr.session.experiment, 'habituation')
