@@ -7,7 +7,7 @@ function vr = positionCheck(vr)
         vr.lastPos = vr.lastPos + vr.position(2);
         % advance the world unless it's in the last one. 
         % otherwise, teminate the experiment gracefully
-        if vr.currentWorld + 1 > vr.exper.userdata.nWorlds
+        if vr.currentWorld + 1 > vr.exper.userdata.nWorlds-1
             % make the worlds invisible
             vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
             % turn the stim off and log

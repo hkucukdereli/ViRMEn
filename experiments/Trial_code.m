@@ -17,12 +17,12 @@ function vr = initializationCodeFun(vr)
                         'date', '190805',...
                         'run', 1,...
                         'rewardsize', 600,...
-                        'experiment', 'trial',... %'habituation' or 'trial' or 'shock' or 'stress'
+                        'experiment', 'stress',... %'habituation' or 'trial' or 'shock' or 'stress'
                         'cueList', struct('stim', 'CueLightRect',... % stim, nostim or neutral
                                           'neutral','CueDarkCircle',... % stim, reward
                                           'gray', 'CueGray'),...
                         'notes', '',...
-                        'config','vrrig_cfg');
+                        'config','debug_cfg');
     
     % load the variables from the config file
     vr = loadConfig(vr);
@@ -166,12 +166,9 @@ function vr = runtimeCodeFun(vr)
             elseif strcmp(vr.session.experiment, 'habituation')
                 vr.sessionData.startTime = vr.startTime;
                 vr = startHabituation(vr);
-            elseif strcmp(vr.session.experiment, 'shock')
-                vr.sessionData.startTime = vr.startTime;
-                vr = startTrial(vr);
             elseif strcmp(vr.session.experiment, 'stress')
                 vr.sessionData.stressTime = vr.startTime;
-                vr.state.onStress = true;
+                vr = startStress(vr);
                 fprintf('Stress period starts.\n');
             end
         elseif vr.paddingCount == 2
@@ -182,12 +179,18 @@ function vr = runtimeCodeFun(vr)
     
     % stress starts
     if vr.state.onStress
-%         vr.position(2) = vr.initPos(2);
+        if vr.shockCount < length(vr.sessionData.stressShocks) && vr.timeElapsed - vr.stressTime > vr.sessionData.stressShocks(vr.shockCount)
+            if vr.session.serial
+                arduinoWriteMsg(vr.arduino_serial, 'PP');
+            end
+            display(vr.shockCount);
+            vr.shockCount = vr.shockCount + 1;
+        end
+        vr = teleportCheck(vr);
     end
     if vr.state.onStress & vr.timeElapsed - vr.startTime >= vr.session.stressDuration
         % log the start time
         vr.startTime = vr.timeElapsed;
-        
         % end stress and move to trial block
         vr.state.onStress = false;
         vr.sessionData.startTime = vr.startTime;

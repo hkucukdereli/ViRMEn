@@ -16,6 +16,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'save', true);
     addOptional(p, 'shuffle', 20);
     addOptional(p, 'shock', false);
+    addOptional(p, 'stress', false);
     addOptional(p, 'tiling', 1);
     addOptional(p, 'rewarddelay', 0);
     addOptional(p, 'padding', false);
@@ -159,6 +160,11 @@ function exper = createTrials(experName, templateName, varargin)
     % create a new template world
     tempWorld = virmenWorld;
     for i=1:length(worlds)
+        if strcmp(worlds{i}.name, 'Habituation')
+            % get the arena floor object
+            % habituation = temp.exper.worlds{i}.copyItem;
+            habituation = temp.exper.worlds{i};
+        end
         if strcmp(worlds{i}.name, 'ArenaFloor')
             % get some variables from the template to use later
             wallHeight = str2num(exper.variables.wallHeight);
@@ -228,6 +234,20 @@ function exper = createTrials(experName, templateName, varargin)
         end
     end
     
+    if p.stress
+        addWorld(exper, tempWorld);
+        exper.worlds{p.nWorlds+1}.name = sprintf('Arena_%i', p.nWorlds+1);
+        dis = 8000;
+        % add the arena floor ro the new world
+        addObject(exper.worlds{p.nWorlds+1}, arenaFloor);
+        exper.worlds{p.nWorlds+1}.objects{end}.height = dis;
+        exper.worlds{p.nWorlds+1}.objects{end}.y = repmat(dis*.5, [2,1]);
+        exper.worlds{p.nWorlds+1}.startLocation = startLocation;
+        addObject(exper.worlds{p.nWorlds+1}, cueWalls.('CueGray'));
+        exper.worlds{p.nWorlds+1}.objects{end}.width = dis;
+        exper.worlds{p.nWorlds+1}.objects{end}.y = repmat(dis*.5, [2,1]);
+        % exper.worlds{p.nWorlds+1}.objects{2}.tiling = [1, 1];
+    end
 
     if ~p.padding
         exper.userdata.positions = posArr;
