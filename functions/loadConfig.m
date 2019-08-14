@@ -11,8 +11,7 @@ function vr = loadConfig(vr)
         vr.session.input_com = vrconfig.input_com;
         vr.licks = 0;
     end
-    vr.session.numTrial = vrconfig.numTrial;
-    vr.session.numStress = vrconfig.numStress;
+    vr.session.numTrials = vrconfig.numTrials;
     vr.session.trialDuration = vrconfig.trialDuration * 60; % sec
     vr.session.stressDuration = vrconfig.stressDuration * 60; % sec
     vr.session.blackoutDuration = vrconfig.blackoutDuration * 60; % sec

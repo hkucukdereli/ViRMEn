@@ -1,5 +1,8 @@
 function vr = startStress(vr)
     vr.state.onStress = true;
+    
+    vr.sessionData.stressTime = [vr.sessionData.stressTime, [vr.timeElapsed, vr.position(2) + vr.lastPos]];
+    
     % enable cam pulses
     if vr.session.serial & ~vr.state.onCam
         arduinoWriteMsg(vr.arduino_serial, 'B');
@@ -9,4 +12,5 @@ function vr = startStress(vr)
     vr.currentWorld = vr.exper.userdata.nWorlds+1;
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
     % initialize the position
-    position(2) = vr.initPos(2);
+    vr.position(2) = vr.initPos(2);
+    vr.dp(:) = 0; % prevent any additional movement during teleportation

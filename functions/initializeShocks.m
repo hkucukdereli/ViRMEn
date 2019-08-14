@@ -1,7 +1,7 @@
 function vr = initializeShocks(vr)
     % determine the shock times
     vr.sessionData.stressShocks = struct([]);
-    for s=1:length(vr.session.numStress)
+    for s=1:length(vr.session.numTrials)
         vr.shocktimes = cumsum(rand([1,20])/3.2);
         vr.shocktimes = vr.shocktimes(vr.shocktimes < 3);
         vr.sessionData.stressShocks = vr.shocktimes;
