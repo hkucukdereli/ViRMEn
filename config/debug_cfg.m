@@ -18,9 +18,9 @@ vrconfig.blackoutDuration = .2; % min
 
 % Trial
 vrconfig.numTrials = 2;
-vrconfig.trialDuration = .2; % min
+vrconfig.trialDuration = .05; % min
 vrconfig.timeoutDuration = 0; % sec
 vrconfig.paddingDuration = .05   ; % min
 
 % Stress
-vrconfig.stressDuration = .05; % min
+vrconfig.stressDuration = .2; % min

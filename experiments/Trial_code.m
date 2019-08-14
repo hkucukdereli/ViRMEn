@@ -32,12 +32,12 @@ function vr = initializationCodeFun(vr)
                       'onStim', false, 'onITI', false, 'onHabituation', false,...
                       'onBlackOut', false, 'onReward', false);
 
-    vr.sessionData = struct('startTime', 0, 'endTime', 0, 'trialNum', 0,...
+    vr.sessionData = struct('startTime', 0, 'endTime', 0, 'trialNum', 1,...
                             'trialTime', [], 'stressTime', [],...
                             'position',[], 'velocity', [], 'timestamp', [],...
                             'stimon', [], 'stimoff', [], 'ition', [],...
                             'timeout',[], 'cuetype',[], 'cueid', [],...
-                            'shockTime', [], 'shockCount', [], 'stressShocks', [],...
+                            'shockTime', [], 'shockCount', [],...
                             'reward',[], 'rewardDelay', [], 'licks', []);
                         
     % initialize the serial
@@ -51,6 +51,7 @@ function vr = initializationCodeFun(vr)
         vr.shockCount = 1;
         % determine the shock times
         vr = initializeShocks(vr);
+        vr.sessionData.stressShocks = {[1,3,5],[2,4,6]};
     elseif strcmp(vr.session.experiment, 'trial')
         vr.shockCount = 0;
     elseif strcmp(vr.session.experiment, 'habituation')
@@ -144,8 +145,7 @@ function vr = runtimeCodeFun(vr)
     % stress starts
     if vr.state.onStress
         vr = teleportCheck(vr);
-        
-        if vr.shockCount < length(vr.sessionData.stressShocks) && vr.timeElapsed - vr.sessionData.stressTime(end) > vr.sessionData.stressShocks(vr.shockCount)
+        if vr.shockCount < length(vr.sessionData.stressShocks{vr.sessionData.trialNum}) && vr.timeElapsed - vr.sessionData.stressTime(end) > vr.sessionData.stressShocks{vr.sessionData.trialNum}(vr.shockCount)
             vr = badMouse(vr);
             display(vr.shockCount);
             vr.shockCount = vr.shockCount + 1;
@@ -153,6 +153,7 @@ function vr = runtimeCodeFun(vr)
         if vr.timeElapsed - vr.sessionData.stressTime(end) >= vr.session.stressDuration
             % end stress and move to trial block
             vr.state.onStress = false;
+            vr.shockCount = 1; % reset the shock count
             vr = startTrial(vr);
             fprintf('Trial starts.\n'); 
         end
@@ -208,7 +209,8 @@ function vr = runtimeCodeFun(vr)
         vr = startPadding(vr);
     end
     % habituation block ends
-
+    
+    
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
