@@ -182,7 +182,6 @@ function vr = runtimeCodeFun(vr)
             % remember which world an dposition we were
             vr.lastWorld = vr.currentWorld;
             vr.lastWorldPos = vr.position(2);
-            display(vr.lastWorldPos);
             vr = startStress(vr);
             fprintf('Stress period starts.\n'); 
         end
