@@ -1,7 +1,7 @@
 function vr = startStress(vr)
     vr.state.onStress = true;
     
-    vr.sessionData.stressTime = [vr.sessionData.stressTime, [vr.timeElapsed, vr.position(2) + vr.lastPos]];
+    vr.sessionData.stressTime = [vr.sessionData.stressTime, vr.timeElapsed];
     
     % enable cam pulses
     if vr.session.serial & ~vr.state.onCam

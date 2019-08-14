@@ -219,8 +219,6 @@ function vr = terminationCodeFun(vr)
         % turn the stim off in case the user escaped and log it
         vr = stimOff(vr);
     end
-    vr.sessionData.trialTime = reshape(vr.sessionData.trialTime, 2, []);
-    vr.sessionData.stressTime = reshape(vr.sessionData.stressTime, 2, []);
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);

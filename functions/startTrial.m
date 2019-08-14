@@ -2,7 +2,7 @@ function vr = startTrial(vr)
     vr.state.onTrial = true;
     
     vr.sessionData.trialNum = vr.sessionData.trialNum + 1;
-    vr.sessionData.trialTime = [vr.sessionData.trialTime, [vr.timeElapsed, vr.position(2) + vr.lastPos]];
+    vr.sessionData.trialTime = [vr.sessionData.trialTime, vr.timeElapsed];
   
     % enable cam pulses
     if vr.session.serial & ~vr.state.onCam
