@@ -139,7 +139,7 @@ function vr = runtimeCodeFun(vr)
             vr.experimentEnded = true;
         end
     end
-    % padding block ends
+    % padding block ends.
     
     % stress starts
     if vr.state.onStress
