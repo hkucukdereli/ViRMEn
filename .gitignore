@@ -1,3 +1,4 @@
 *.asv
 *.dat
-data/*.mat
+/data/*.mat
+/experiments/experiments_old/*
