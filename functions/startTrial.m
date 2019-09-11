@@ -1,11 +1,13 @@
 function vr = startTrial(vr)
     vr.state.onTrial = true;
     
+    fprintf('Trial starts: trial number %i\n', vr.sessionData.trialNum);
+    
     vr.sessionData.trialNum = vr.sessionData.trialNum + 1;
     vr.sessionData.trialTime = [vr.sessionData.trialTime, vr.timeElapsed];
   
     % enable cam pulses
-    if vr.session.serial & ~vr.state.onCam
+    if vr.session.serial && ~vr.state.onCam
         arduinoWriteMsg(vr.arduino_serial, 'B');
         vr.state.onCam = true;
     end

@@ -1,5 +1,11 @@
 function vr = startStress(vr)
+    % log the start time
+    vr.startTime = vr.timeElapsed;
+    vr.sessionData.startTime = vr.startTime;
+    
     vr.state.onStress = true;
+    
+    fprintf('Stress period starts.\n');
     
     vr.sessionData.stressTime = [vr.sessionData.stressTime, vr.timeElapsed];
     

@@ -16,42 +16,42 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP00',...
                         'date', '190805',...
                         'run', 1,...
-                        'rewardsize', 600,...
-                        'experiment', 'stress',... %'habituation' or 'trial' or 'stress'
-                        'cueList', struct('stim', 'CueLightRect',... % stim, nostim or neutral
-                                          'neutral','CueDarkCircle',... % stim, reward
+                        'experiment', 'trial',... %'habituation' or 'trial' or 'stress'
+                        'cueList', struct('stim', 'CueLightRect',... % stim or neutral
+                                          'neutral','CueDarkCircle',... % stim
                                           'gray', 'CueGray'),...
                         'notes', '',...
                         'config','debug_cfg');
-    
-    % load the variables from the config file
-    vr = loadConfig(vr);
 
-    vr.state = struct('onWait', true, 'onKey', false, 'onCam', false,...
-                      'onStress', false, 'onPadding', false, 'onTrial', false,...
-                      'onStim', false, 'onITI', false, 'onHabituation', false,...
-                      'onBlackOut', false, 'onReward', false);
+    vr.state = struct('onWait',true, 'onKey',false, 'onCam',false,...
+                      'onStress',false, 'onPadding',false, 'onTrial',false,...
+                      'onStim',false, 'onITI',false, 'onHabituation',false,...
+                      'onBlackOut',false, 'onPlot',false, 'onDAQ',false);
 
     vr.sessionData = struct('startTime', 0, 'endTime', 0, 'trialNum', 1,...
                             'trialTime', [], 'stressTime', [],...
                             'position',[], 'velocity', [], 'timestamp', [],...
                             'stimon', [], 'stimoff', [], 'ition', [],...
                             'timeout',[], 'cuetype',[], 'cueid', [],...
-                            'shockTime', [], 'shockCount', [],...
-                            'reward',[], 'rewardDelay', [], 'licks', []);
-                        
+                            'shockTime', [], 'shockCount', []);
+       
+    % load the variables from the config file
+    vr = loadConfig(vr);
+    
     % initialize the serial
-    if vr.session.serial
-        serialFix;
-        vr = initializationForSerial(vr);
-    end
+    vr = initializationForSerial(vr);
+    
+    % initialize plotting window
+    vr = initializePlot(vr);
+    
+    % initialize the nidaq board
+    % vr = initializeDAQ(vr, [0:1]);
     
     % initialize shock count depending on the experiment
     if strcmp(vr.session.experiment, 'stress')
         vr.shockCount = 1;
-        % determine the shock times
+        % set the shock times
         vr = initializeShocks(vr);
-        vr.sessionData.stressShocks = {[1,3,5],[2,4,6]};
     elseif strcmp(vr.session.experiment, 'trial')
         vr.shockCount = 0;
     elseif strcmp(vr.session.experiment, 'habituation')
@@ -63,6 +63,7 @@ function vr = initializationCodeFun(vr)
     vr.startTime = 0;
     vr.endTime = 0;
     % vr.stressTime = 0;
+    vr.paddingTime = 0;
     vr.stimTime = 0;
     
     vr.cueid = 0;
@@ -79,13 +80,6 @@ function vr = initializationCodeFun(vr)
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
     vr.waitOn = true;
     
-    if isfield(vr.exper.userdata, 'rewarddelay')
-        vr.rewardDelay = vr.exper.userdata.rewarddelay; % sec
-    else
-        vr.rewardDelay = 0;
-        fprintf('Reward delay is set to 0 seconds.\n');
-    end
-    
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
     
@@ -94,18 +88,21 @@ function vr = initializationCodeFun(vr)
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
 
+    % log the data
     vr = logData(vr);
+    
+    % plot the animal's position on the second window if necessary
+    vr = vrPlot(vr);
 
     % wait starts
     if vr.state.onWait
         vr.position(2) = vr.initPos(2);
-        if (vr.keyPressed == 83 | vr.keyPressed == 115)
+        % send out shocks if 'S' key is pressed
+        if (vr.keyPressed == 83 || vr.keyPressed == 115)
             arduinoWriteMsg(vr.arduino_serial, 'PP');
         end
     end
-    if vr.state.onWait & vr.keyPressed == 32
-        % log the start time
-        vr.startTime = vr.timeElapsed;
+    if vr.state.onWait && vr.keyPressed == 32
         % end wait and move to padding block
         vr.state.onWait = false;
         vr = startPadding(vr);
@@ -117,24 +114,21 @@ function vr = runtimeCodeFun(vr)
     if vr.state.onPadding
         vr.position(2) = vr.initPos(2);
     end
-    if vr.state.onPadding & vr.timeElapsed - vr.startTime >= vr.session.paddingDuration
-        % log the start time
-        vr.startTime = vr.timeElapsed;
+    if vr.state.onPadding && vr.timeElapsed - vr.paddingTime >= vr.session.paddingDuration(vr.paddingCount)
         % end padding and move to the next block stress or trial
         vr.state.onPadding = false;
         
         if vr.paddingCount == 1
+            % log the start time
+            vr.startTime = vr.timeElapsed;
+            vr.sessionData.startTime = vr.startTime;
+    
             if strcmp(vr.session.experiment, 'trial')
-                vr.sessionData.startTime = vr.startTime;
-                vr = startTrial(vr);
-                fprintf('Trial starts.\n');
+                vr = startTrial(vr);  
             elseif strcmp(vr.session.experiment, 'habituation')
-                vr.sessionData.startTime = vr.startTime;
                 vr = startHabituation(vr);
             elseif strcmp(vr.session.experiment, 'stress')
-                vr.sessionData.startTime = vr.startTime;
                 vr = startStress(vr);
-                fprintf('Stress period starts.\n');
             end
         elseif vr.paddingCount == 2
             vr.experimentEnded = true;
@@ -147,25 +141,32 @@ function vr = runtimeCodeFun(vr)
         vr = teleportCheck(vr);
         if vr.shockCount < length(vr.sessionData.stressShocks{vr.sessionData.trialNum}) && vr.timeElapsed - vr.sessionData.stressTime(end) > vr.sessionData.stressShocks{vr.sessionData.trialNum}(vr.shockCount)
             vr = badMouse(vr);
-            display(vr.shockCount);
-            vr.shockCount = vr.shockCount + 1;
         end
         if vr.timeElapsed - vr.sessionData.stressTime(end) >= vr.session.stressDuration
             % end stress and move to trial block
             vr.state.onStress = false;
             vr.shockCount = 1; % reset the shock count
             vr = startTrial(vr);
-            fprintf('Trial starts.\n'); 
         end
     end
     % stress block ends
     
     % trial start
     if vr.state.onTrial
-        % see if there's reward to be given
-        vr = rewardCheck(vr);
         % see if time out is needed
-        vr = timeoutCheck(vr);
+        if strcmp(vr.currentCue, vr.session.cueList.('stim'))
+            display(vr.sessionData.stimon);
+            if vr.timeElapsed - vr.sessionData.stimon(end-1) >= vr.session.timeoutDuration
+                [r, c] = find(vr.exper.userdata.cueids(vr.currentWorld:end,:) == vr.cueid+1);
+                display(r, c);
+                display(vr.exper.userdata.positions(r(1), c(1)) + 1);
+            end
+        end
+            % % % vr.cueid++
+% % %         vr = timeoutCheck(vr);
+% % %         if timenow - (stimon or stimoff time) >= timeout time
+% % %             teleport to the begining of the next gray cue to force ition
+% % %         end
         % update the position and cue lists
         vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
         vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
@@ -183,8 +184,12 @@ function vr = runtimeCodeFun(vr)
             % remember which world an dposition we were
             vr.lastWorld = vr.currentWorld;
             vr.lastWorldPos = vr.position(2);
-            vr = startStress(vr);
-            fprintf('Stress period starts.\n'); 
+            % move to the next trial or next stress period
+            if strcmp(vr.session.experiment, 'stress')
+                vr = startStress(vr);
+            else
+                vr = startTrial(vr);
+            end
         end
     
         % terminate the trial if necessary
@@ -203,7 +208,7 @@ function vr = runtimeCodeFun(vr)
     if vr.state.onHabituation
         vr = teleportCheck(vr);
     end
-    if vr.state.onHabituation & vr.timeElapsed - vr.sessionData.startTime >= vr.session.trialDuration
+    if vr.state.onHabituation && vr.timeElapsed - vr.sessionData.startTime >= vr.session.habituationDuration
         vr.state.onHabituation = false;
         vr.sessionData.endTime = vr.timeElapsed;
         vr = startPadding(vr);
@@ -215,16 +220,16 @@ function vr = runtimeCodeFun(vr)
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
     % log the time in case the user escaped
-    if ~vr.endTime & vr.sessionData.startTime & ~strcmp(vr.session.experiment, 'habituation')
+    if ~vr.endTime && vr.sessionData.startTime
         vr.sessionData.endTime = vr.timeElapsed;
-        % turn the stim off in case the user escaped and log it
-        vr = stimOff(vr);
+        if ~strcmp(vr.session.experiment, 'habituation')
+            % turn the stim off in case the user escaped and log it
+            vr = stimOff(vr);
+        end
     end
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
-    vr.sessionData.reward = reshape(vr.sessionData.reward, 2, []);
-    vr.sessionData.licks = reshape(vr.sessionData.licks, 2, []);
     
     sessionData = vr.sessionData;
     session = vr.session;

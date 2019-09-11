@@ -6,7 +6,7 @@ vrconfig.basedir = 'C:/Users/andermann/Documents/MATLAB/ViRMEn';
 % Serial communication
 vrconfig.serial = true;
 vrconfig.com = 5;
-vrconfig.lick = false;
+vrconfig.input = false;
 vrconfig.input_com = 6;
 
 % Habituation
@@ -21,7 +21,7 @@ vrconfig.blackoutDuration = 15; % min
 vrconfig.numTrials = 1;
 vrconfig.trialDuration = 60; % min
 vrconfig.timeoutDuration = 0; % sec
-vrconfig.paddingDuration = 0; % min
+vrconfig.paddingDuration = [5, 15]   ; % min
 
 % Stress
 vrconfig.stressDuration = 5; % min  

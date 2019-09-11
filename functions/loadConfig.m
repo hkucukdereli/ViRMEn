@@ -6,11 +6,12 @@ function vr = loadConfig(vr)
     vr.session.basedir = vrconfig.basedir;
     vr.session.serial = vrconfig.serial;
     vr.session.com = vrconfig.com;
-    vr.session.lick = vrconfig.lick;
-    if vr.session.lick
+    vr.session.input = vrconfig.input;
+    if vr.session.input
         vr.session.input_com = vrconfig.input_com;
-        vr.licks = 0;
     end
+    
+    % trial  variables
     vr.session.numTrials = vrconfig.numTrials;
     vr.session.trialDuration = vrconfig.trialDuration * 60; % sec
     vr.session.stressDuration = vrconfig.stressDuration * 60; % sec
@@ -20,7 +21,8 @@ function vr = loadConfig(vr)
     vr.session.conditioningDuration = vrconfig.conditioningDuration * 60; % sec
     vr.session.paddingDuration = vrconfig.paddingDuration * 60; % sec
     
-    if strcmp(vr.session.experiment, 'trial') | strcmp(vr.session.experiment, 'stress') | strcmp(vr.session.experiment, 'shock')
+    % cue info
+    if strcmp(vr.session.experiment, 'trial') || strcmp(vr.session.experiment, 'stress') || strcmp(vr.session.experiment, 'shock')
         vr.session.cuelengths = vr.exper.userdata.postrack;
         vr.session.transitions = vr.exper.userdata.postrans;
         vr.session.cuetypes = vr.exper.userdata.cuestrack;
