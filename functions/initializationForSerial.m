@@ -11,7 +11,7 @@ function vr = initializationForSerial(vr)
         catch
             fprintf('COM%i is not available or Arduino is not connected. Continuing without serial...\n', vr.session.com);
         end
-        if vr.session.lick
+        if vr.session.input
             vr.arduino_serial_input = arduinoOpen(vr.session.input_com);
             fprintf('Input device is connected to COM%i.\n', vr.session.input_com);
         end

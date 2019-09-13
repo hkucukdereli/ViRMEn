@@ -2,6 +2,7 @@ global vrconfig
 
 vrconfig.rig = 'vr_rig';
 vrconfig.basedir = 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn';
+vrconfig.save = true;
 
 % Serial communication
 vrconfig.serial = false;
@@ -19,7 +20,7 @@ vrconfig.blackoutDuration = .2; % min
 % Trial
 vrconfig.numTrials = 1;
 vrconfig.trialDuration = 5; % min
-vrconfig.timeoutDuration = 0.1; % sec
+vrconfig.timeoutDuration = 50; % sec
 vrconfig.paddingDuration = [.01, .1]   ; % min
 
 % Stress

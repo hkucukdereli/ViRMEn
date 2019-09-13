@@ -4,6 +4,7 @@ function vr = loadConfig(vr)
     vr.session.expername = vr.exper.name;
     vr.session.rig = vrconfig.rig;
     vr.session.basedir = vrconfig.basedir;
+    vr.session.save = vrconfig.save;
     vr.session.serial = vrconfig.serial;
     vr.session.com = vrconfig.com;
     vr.session.input = vrconfig.input;

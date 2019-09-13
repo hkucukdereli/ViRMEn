@@ -16,7 +16,7 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP00',...
                         'date', '190805',...
                         'run', 1,...
-                        'experiment', 'trial',... %'habituation' or 'trial' or 'stress'
+                        'experiment', 'habituation',... %'habituation' or 'trial' or 'stress'
                         'cueList', struct('stim', 'CueLightRect',... % stim or neutral
                                           'neutral','CueDarkCircle',... % stim
                                           'gray', 'CueGray'),...
@@ -34,9 +34,12 @@ function vr = initializationCodeFun(vr)
                             'stimon', [], 'stimoff', [], 'ition', [],...
                             'timeout',[], 'cuetype',[], 'cueid', [],...
                             'shockTime', [], 'shockCount', []);
-       
+    
     % load the variables from the config file
     vr = loadConfig(vr);
+    
+    % initilize save
+    vr = initializeSave(vr);
     
     % initialize the serial
     vr = initializationForSerial(vr);
@@ -150,23 +153,13 @@ function vr = runtimeCodeFun(vr)
         end
     end
     % stress block ends
-    
+%     display(vr.position(2));
+%     display([vr.currentWorld + 1, vr.exper.userdata.nWorlds])
     % trial start
     if vr.state.onTrial
         % see if time out is needed
-        if strcmp(vr.currentCue, vr.session.cueList.('stim'))
-            display(vr.sessionData.stimon);
-            if vr.timeElapsed - vr.sessionData.stimon(end-1) >= vr.session.timeoutDuration
-                [r, c] = find(vr.exper.userdata.cueids(vr.currentWorld:end,:) == vr.cueid+1);
-                display(r, c);
-                display(vr.exper.userdata.positions(r(1), c(1)) + 1);
-            end
-        end
-            % % % vr.cueid++
-% % %         vr = timeoutCheck(vr);
-% % %         if timenow - (stimon or stimoff time) >= timeout time
-% % %             teleport to the begining of the next gray cue to force ition
-% % %         end
+        vr = checkTimeout(vr);
+
         % update the position and cue lists
         vr.positions = vr.exper.userdata.positions(vr.currentWorld,:);
         vr.cuelist = vr.exper.userdata.cues(vr.currentWorld,:);
@@ -196,7 +189,11 @@ function vr = runtimeCodeFun(vr)
         if vr.timeElapsed - vr.sessionData.startTime >= vr.session.numTrials*(vr.session.trialDuration + vr.session.stressDuration)
             % vr.startTime = vr.timeElapsed;
             vr.state.onTrial = false;
-            vr = stimOff(vr);
+            %vr = stimOff(vr);
+            if vr.session.serial
+                % turn the stim off just to be safe
+                arduinoWriteMsg(vr.arduino_serial, 'O');
+            end
             vr.endTime = vr.timeElapsed;
             vr.sessionData.endTime = vr.timeElapsed;
             vr = startPadding(vr);
@@ -224,7 +221,7 @@ function vr = terminationCodeFun(vr)
         vr.sessionData.endTime = vr.timeElapsed;
         if ~strcmp(vr.session.experiment, 'habituation')
             % turn the stim off in case the user escaped and log it
-            vr = stimOff(vr);
+            %vr = stimOff(vr);
         end
     end
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
@@ -233,9 +230,7 @@ function vr = terminationCodeFun(vr)
     
     sessionData = vr.sessionData;
     session = vr.session;
-    save(sprintf('%s/data/%s_%s_%i_%s.mat',...
-        vr.session.basedir, vr.session.mouse, vr.session.date, vr.session.run, vr.session.experiment),...
-        'session', 'sessionData');
+    save(vr.savepath, 'session', 'sessionData');
     
     if vr.session.serial
         % turn the stim off just to be safe
