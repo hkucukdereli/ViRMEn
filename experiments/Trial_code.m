@@ -16,9 +16,9 @@ function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP00',...
                         'date', '190805',...
                         'run', 1,...
-                        'experiment', 'habituation',... %'habituation' or 'trial' or 'stress'
-                        'cueList', struct('stim', 'CueLightRect',... % stim or neutral
-                                          'neutral','CueDarkCircle',... % stim
+                        'experiment', 'trial',... %'habituation' or 'trial' or 'stress'
+                        'cueList', struct('stim', 'CueStripe90',... % stim or neutral
+                                          'neutral','CueCheckers',... % stim
                                           'gray', 'CueGray'),...
                         'notes', '',...
                         'config','debug_cfg');
@@ -34,6 +34,15 @@ function vr = initializationCodeFun(vr)
                             'stimon', [], 'stimoff', [], 'ition', [],...
                             'timeout',[], 'cuetype',[], 'cueid', [],...
                             'shockTime', [], 'shockCount', []);
+    
+    % check if the right cues are used
+    cuetypes = fields(vr.session.cueList)  
+    for c=1:length(cuetypes)
+        cue = vr.session.cueList.(cell2mat(cuetypes(c)));
+        if ~any(strcmp(cue, vr.exper.userdata.cuelist))
+            error('%s is not a valid cue name. Wrong cue name is given for the %s cue.\n', cue, cell2mat(cuetypes(c)));
+        end
+    end
     
     % load the variables from the config file
     vr = loadConfig(vr);
@@ -230,7 +239,10 @@ function vr = terminationCodeFun(vr)
     
     sessionData = vr.sessionData;
     session = vr.session;
-    save(vr.savepath, 'session', 'sessionData');
+    
+    if vr.session.save
+        save(vr.savepath, 'session', 'sessionData');
+    end
     
     if vr.session.serial
         % turn the stim off just to be safe

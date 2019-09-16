@@ -2,7 +2,7 @@ global vrconfig
 
 vrconfig.rig = 'vr_rig';
 vrconfig.basedir = 'C:/Users/hkucukde/Dropbox/Hakan/AndermannLab/code/MATLAB/ViRMEn/data';
-vrconfig.save = true;
+vrconfig.save = false;
 
 % Serial communication
 vrconfig.serial = false;
