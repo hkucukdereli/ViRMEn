@@ -275,4 +275,4 @@ function exper = createTrials(experName, templateName, varargin)
     else
         warning('New experiment is created but not saved.');
     end
-    
+
