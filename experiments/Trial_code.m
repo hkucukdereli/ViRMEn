@@ -162,8 +162,7 @@ function vr = runtimeCodeFun(vr)
         end
     end
     % stress block ends
-%     display(vr.position(2));
-%     display([vr.currentWorld + 1, vr.exper.userdata.nWorlds])
+
     % trial start
     if vr.state.onTrial
         % see if time out is needed
