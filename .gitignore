@@ -2,3 +2,4 @@
 *.dat
 /data/*.mat
 /experiments/experiments_old/*
+/config/vrrig_cfg.m
