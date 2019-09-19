@@ -36,7 +36,7 @@ function vr = initializationCodeFun(vr)
                             'shockTime', [], 'shockCount', []);
     
     % check if the right cues are used
-    cuetypes = fields(vr.session.cueList)  
+    cuetypes = fields(vr.session.cueList);
     for c=1:length(cuetypes)
         cue = vr.session.cueList.(cell2mat(cuetypes(c)));
         if ~any(strcmp(cue, vr.exper.userdata.cuelist))
