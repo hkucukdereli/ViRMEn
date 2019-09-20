@@ -15,7 +15,11 @@ function vr = loadConfig(vr)
     % trial  variables
     vr.session.numTrials = vrconfig.numTrials;
     vr.session.trialDuration = vrconfig.trialDuration * 60; % sec
-    vr.session.stressDuration = vrconfig.stressDuration * 60; % sec
+    if strcmp(vr.session.experiment, 'stress')
+        vr.session.stressDuration = vrconfig.stressDuration * 60; % sec
+    else
+        vr.session.stressDuration = 0;
+    end
     vr.session.blackoutDuration = vrconfig.blackoutDuration * 60; % sec
     vr.session.habituationDuration = vrconfig.habituationDuration * 60; % sec
     vr.session.timeoutDuration = vrconfig.timeoutDuration; % sec

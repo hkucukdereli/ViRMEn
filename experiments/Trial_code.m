@@ -14,8 +14,8 @@ code.termination = @terminationCodeFun;
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr) 
     vr.session = struct('mouse', 'TP00',...
-                        'date', '190805',...
-                        'run', 1,...
+                        'date', '190919',...
+                        'run', 3,...
                         'experiment', 'trial',... %'habituation' or 'trial' or 'stress'
                         'cueList', struct('stim', 'CueStripe90',... % stim or neutral
                                           'neutral','CueCheckers',... % stim
@@ -94,12 +94,13 @@ function vr = initializationCodeFun(vr)
     
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
+         tic;
     
         
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
-
+    fprintf(' \bViRMEn clock: %f, Padding clock: %f, Trial clock: %f\n', vr.timeElapsed, vr.timeElapsed-vr.paddingTime, vr.timeElapsed-vr.startTime);
     % log the data
     vr = logData(vr);
     
