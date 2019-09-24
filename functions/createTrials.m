@@ -7,6 +7,7 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'experiment', @Trial_code);
     addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
     addOptional(p, 'grayCue', {}); 
+    addOptional(p, 'experimentType', 'trial'); 
     addOptional(p, 'atrandom', false);
     addOptional(p, 'nWorlds', 10);
     addOptional(p, 'overlap', 4);
@@ -109,6 +110,7 @@ function exper = createTrials(experName, templateName, varargin)
     
     % populate the experiment
     exper.name = experName;
+    exper.userdata.experimentType = p.experimentType;
     exper.userdata.cuelist = cueList;
     exper.variables = temp.exper.variables;
     exper.userdata.rewarddelay = p.rewarddelay;

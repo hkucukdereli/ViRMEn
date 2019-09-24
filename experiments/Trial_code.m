@@ -15,8 +15,7 @@ code.termination = @terminationCodeFun;
 function vr = initializationCodeFun(vr) 
     vr.session = struct('mouse', 'TP00',...
                         'date', '190919',...
-                        'run', 3,...
-                        'experiment', 'trial',... %'habituation' or 'trial' or 'stress'
+                        'run', 2,...
                         'cueList', struct('stim', 'CueStripe90',... % stim or neutral
                                           'neutral','CueCheckers',... % stim
                                           'gray', 'CueGray'),...
@@ -57,7 +56,7 @@ function vr = initializationCodeFun(vr)
     vr = initializePlot(vr);
     
     % initialize the nidaq board
-    % vr = initializeDAQ(vr, [0:1]);
+    vr = initializeDAQ(vr);
     
     % initialize shock count depending on the experiment
     if strcmp(vr.session.experiment, 'stress')
@@ -95,12 +94,22 @@ function vr = initializationCodeFun(vr)
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
          tic;
+         
+    vr.prevT = 0;
+    vr.sessionData.deltatime = [];
     
         
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
-    fprintf(' \bViRMEn clock: %f, Padding clock: %f, Trial clock: %f\n', vr.timeElapsed, vr.timeElapsed-vr.paddingTime, vr.timeElapsed-vr.startTime);
+    vr.daq.data = [vr.daq.data, vr.daq.session.inputSingleScan];
+    
+    deltatime = vr.timeElapsed - vr.prevT;
+    vr.sessionData.deltatime = [vr.sessionData.deltatime, deltatime];
+    
+    vr.prevT = vr.timeElapsed;
+    % fprintf(' \bViRMEn clock: %f, Padding clock: %f, Trial clock: %f\n', vr.timeElapsed, vr.timeElapsed-vr.paddingTime, vr.timeElapsed-vr.startTime);
+    
     % log the data
     vr = logData(vr);
     
@@ -224,13 +233,13 @@ function vr = runtimeCodeFun(vr)
     
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
-function vr = terminationCodeFun(vr)
+function vr = terminationCodeFun(vr)  
     % log the time in case the user escaped
     if ~vr.endTime && vr.sessionData.startTime
         vr.sessionData.endTime = vr.timeElapsed;
         if ~strcmp(vr.session.experiment, 'habituation')
             % turn the stim off in case the user escaped and log it
-            %vr = stimOff(vr);
+            % vr = stimOff(vr);
         end
     end
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
@@ -239,9 +248,11 @@ function vr = terminationCodeFun(vr)
     
     sessionData = vr.sessionData;
     session = vr.session;
+    daqData = vr.daq.data;
+    %daqTime = vr.daq.time; 
     
     if vr.session.save
-        save(vr.savepath, 'session', 'sessionData');
+        save(vr.savepath, 'session', 'sessionData', 'daqData');
     end
     
     if vr.session.serial
@@ -250,3 +261,4 @@ function vr = terminationCodeFun(vr)
         arduinoWriteMsg(vr.arduino_serial, 'C'); % disbale cam pulsing
         terminationForSerial(vr);
     end
+    

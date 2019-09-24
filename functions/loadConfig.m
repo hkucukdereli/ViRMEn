@@ -1,15 +1,27 @@
 function vr = loadConfig(vr)
+    % get the experiment type
+    vr.session.experiment = vr.exper.userdata.experimentType;
     % load the variables from the config file
     run(vr.session.config);
     vr.session.expername = vr.exper.name;
     vr.session.rig = vrconfig.rig;
     vr.session.basedir = vrconfig.basedir;
     vr.session.save = vrconfig.save;
+    
+    % serial related
     vr.session.serial = vrconfig.serial;
     vr.session.com = vrconfig.com;
     vr.session.input = vrconfig.input;
     if vr.session.input
         vr.session.input_com = vrconfig.input_com;
+    end
+    
+    % nidaq related
+    vr.daq.state = vrconfig.daq;
+    if vr.daq.state
+        vr.daq.device = vrconfig.device;
+        vr.daq.channels = vrconfig.channels;
+        vr.daq.channelnames = vrconfig.channelnames;
     end
     
     % trial  variables
@@ -43,3 +55,6 @@ function vr = loadConfig(vr)
             warning("Shock positions are not given.");
         end
     end
+    
+    
+    

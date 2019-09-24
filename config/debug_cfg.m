@@ -10,6 +10,12 @@ vrconfig.com = 5;
 vrconfig.input = false;
 vrconfig.input_com = 5;
 
+% NIdaq communication
+vrconfig.daq = true;
+vrconfig.device = 'Dev1';
+vrconfig.channelnames = {'cam'};
+vrconfig.channels = {'Port1/Line1'};
+
 % Habituation
 vrconfig.habituationDuration = .2; % min
 
@@ -21,7 +27,7 @@ vrconfig.blackoutDuration = .2; % min
 vrconfig.numTrials = 1;
 vrconfig.trialDuration = 1; % min
 vrconfig.timeoutDuration = 5*60; % sec
-vrconfig.paddingDuration = [1, 0]   ; % min
+vrconfig.paddingDuration = [0, 0]   ; % min
 
 % Stress
 vrconfig.stressDuration = 15; % min
