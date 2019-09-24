@@ -93,9 +93,7 @@ function vr = initializationCodeFun(vr)
     
     fprintf(['Press S to test the shock during the waiting period.\n',...
              'Press spacebar to start the experiment.\n']);
-         tic;
          
-    vr.prevT = 0;
     
         
         
