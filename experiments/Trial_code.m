@@ -100,11 +100,11 @@ function vr = initializationCodeFun(vr)
         
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
-function vr = runtimeCodeFun(vr)
-    vr.daq.data = [vr.daq.data, vr.daq.session.inputSingleScan];
+function vr = runtimeCodeFun(vr) 
+    vr.daq.data = [vr.daq.data, [vr.timeElapsed, vr.daq.session.inputSingleScan]];
 %     daq_data = getdata(vr.daq.in);
 %     vr.daq.data = [vr.daq.data, daq_data];
-    
+
     % log the data
     vr = logData(vr);
     
@@ -224,7 +224,9 @@ function vr = runtimeCodeFun(vr)
         vr = startPadding(vr);
     end
     % habituation block ends
-    
+   
+
+
     
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
@@ -242,9 +244,9 @@ function vr = terminationCodeFun(vr)
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
     vr.sessionData.timeout = reshape(vr.sessionData.timeout, 2, []);
     
+    daqDat = reshape(vr.daq.data, 2, []);
     sessionData = vr.sessionData;
     session = vr.session;
-    daqData = vr.daq.data;
     
     if vr.session.save
         if vr.daq.state
