@@ -14,8 +14,8 @@ code.termination = @terminationCodeFun;
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr) 
     vr.session = struct('mouse', 'TP00',...
-                        'date', '190919',...
-                        'run', 2,...
+                        'date', '190924',...
+                        'run', 1,...
                         'cueList', struct('stim', 'CueStripe90',... % stim or neutral
                                           'neutral','CueCheckers',... % stim
                                           'gray', 'CueGray'),...
@@ -96,19 +96,14 @@ function vr = initializationCodeFun(vr)
          tic;
          
     vr.prevT = 0;
-    vr.sessionData.deltatime = [];
     
         
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
     vr.daq.data = [vr.daq.data, vr.daq.session.inputSingleScan];
-    
-    deltatime = vr.timeElapsed - vr.prevT;
-    vr.sessionData.deltatime = [vr.sessionData.deltatime, deltatime];
-    
-    vr.prevT = vr.timeElapsed;
-    % fprintf(' \bViRMEn clock: %f, Padding clock: %f, Trial clock: %f\n', vr.timeElapsed, vr.timeElapsed-vr.paddingTime, vr.timeElapsed-vr.startTime);
+%     daq_data = getdata(vr.daq.in);
+%     vr.daq.data = [vr.daq.data, daq_data];
     
     % log the data
     vr = logData(vr);
@@ -184,7 +179,7 @@ function vr = runtimeCodeFun(vr)
         vr.cueids = vr.exper.userdata.cueids(vr.currentWorld,:);
         % find out which cue the position falls into
         vr = whichCue(vr);
-        % only do something if the cue has changed
+        % only do something if the cue shas changed
         vr = selectCue(vr);
         % see if the position is at the start of the overlap
         vr = positionCheck(vr);
@@ -245,14 +240,18 @@ function vr = terminationCodeFun(vr)
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
+    vr.sessionData.timeout = reshape(vr.sessionData.timeout, 2, []);
     
     sessionData = vr.sessionData;
     session = vr.session;
     daqData = vr.daq.data;
-    %daqTime = vr.daq.time; 
     
     if vr.session.save
-        save(vr.savepath, 'session', 'sessionData', 'daqData');
+        if vr.daq.state
+            save(vr.savepath, 'session', 'sessionData', 'daqData');
+        else
+            save(vr.savepath, 'session', 'sessionData');
+        end
     end
     
     if vr.session.serial

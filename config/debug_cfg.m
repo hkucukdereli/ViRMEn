@@ -14,7 +14,7 @@ vrconfig.input_com = 5;
 vrconfig.daq = true;
 vrconfig.device = 'Dev1';
 vrconfig.channelnames = {'cam'};
-vrconfig.channels = {'Port1/Line1'};
+vrconfig.channels = [0];
 
 % Habituation
 vrconfig.habituationDuration = .2; % min
@@ -26,7 +26,7 @@ vrconfig.blackoutDuration = .2; % min
 % Trial
 vrconfig.numTrials = 1;
 vrconfig.trialDuration = 1; % min
-vrconfig.timeoutDuration = 5*60; % sec
+vrconfig.timeoutDuration = 5; % sec
 vrconfig.paddingDuration = [0, 0]   ; % min
 
 % Stress
