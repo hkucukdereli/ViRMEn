@@ -19,6 +19,7 @@ function vr = loadConfig(vr)
     % nidaq related
     vr.daq.state = vrconfig.daq;
     if vr.daq.state
+        vr.daq.daqtype = vrconfig.daqtype;
         vr.daq.device = vrconfig.device;
         vr.daq.channels = vrconfig.channels;
         vr.daq.channelnames = vrconfig.channelnames;

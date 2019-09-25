@@ -6,14 +6,14 @@ vrconfig.save = true;
 
 % Serial communication
 vrconfig.serial = true;
-vrconfig.com = 5;
+vrconfig.com = 7;
 vrconfig.input = false;
 vrconfig.input_com = 6;
 
 % NIdaq communication
 vrconfig.daq = true;
 vrconfig.daqtype = 'analog';
-vrconfig.device = 'Dev1';
+vrconfig.device = 'Dev2';
 vrconfig.channelnames = {'cam'};
 vrconfig.channels = [0];
 

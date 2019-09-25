@@ -1,8 +1,8 @@
 function vr = stimOff(vr)
-    fprintf(' \bEntering neutral zone.\n');
+    fprintf(' \nEntering neutral zone.');
     vr.plot(1).color = [0 0 0];
     
-    vr.sessionData.stimoff = [vr.sessionData.stimoff, [vr.timeElapsed, vr.position(2) + vr.lastPos]];
+    vr.sessionData.stimoff = [vr.sessionData.stimoff, [vr.timeElapsed; vr.position(2) + vr.lastPos]];
     vr.sessionData.cueid = [vr.sessionData.cueid, vr.cueid];
     vr.sessionData.cuetype = [vr.sessionData.cuetype, vr.currentCue];
     

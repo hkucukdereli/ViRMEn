@@ -13,7 +13,7 @@ vrconfig.input_com = 6;
 % NIdaq communication
 vrconfig.daq = true;
 vrconfig.daqtype = 'analog';
-vrconfig.device = 'Dev1';
+vrconfig.device = 'Dev2';
 vrconfig.channelnames = {'cam'};
 vrconfig.channels = [0];
 
