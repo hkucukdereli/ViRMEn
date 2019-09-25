@@ -3,13 +3,14 @@
 #include <digitalWriteFast.h> // get it from: https://github.com/NicksonYap/digitalWriteFast
 
 #define LED_PIN 13    // visual stim input from ML
-#define STIM_PIN 12   // laser trigger pin
-#define PUNISH_PIN 11 // shock trigger pin
-#define REWARD_PIN 10 // reward trigger pin
-#define CAM_PIN 9     // camera trigger pin
-#define LICK_PIN 8    // lick input pin
+#define STIM_PIN 9   // laser trigger pin
+#define PUNISH_PIN 10  // shock trigger pin
+#define CAM_OUT 11    // caopy of the camera pulses
+#define CAM_PIN 12    // camera trigger pin
+#define LICK_PIN 6    // lick input pin
+#define REWARD_PIN 7  // reward trigger pin
 
-Encoder myEnc(2,3); // encoder is connected to interrupts 1&2
+Encoder myEnc(2,3);   // encoder is connected to interrupts 1&2
 
 byte *b;
 
@@ -72,6 +73,7 @@ void setup()
   pinModeFast(PUNISH_PIN, OUTPUT);
   pinModeFast(REWARD_PIN, OUTPUT);
   pinModeFast(CAM_PIN, OUTPUT);
+  pinModeFast(CAM_OUT, OUTPUT);
   pinModeFast(LICK_PIN, INPUT);
 
   Serial.begin(115200);
@@ -106,6 +108,7 @@ void loop() {
       // Disable cam pulsing
       onCam = false;
       digitalWriteFast(CAM_PIN, LOW);
+      digitalWriteFast(CAM_OUT, LOW);
       break;
       
     case 'S':
@@ -159,11 +162,16 @@ void loop() {
   if (!onPulse && currentMillis - previousMillis >= interval - pulseDur) {
     previousMillis = currentMillis;
     if (vrtest) {vel = pos;}
-    else {vel = ((pos - prevPos) * 1000) / interval;}
+    else {
+      vel = ((pos - prevPos) * 1000) / interval;
+      if (vel < 0) {vel = 0;}
+      else {vel = vel;}
+      }
     b = (byte *) &vel;
     Serial.write(b, 4);
     if (onCam) {
       digitalWriteFast(CAM_PIN, HIGH); // trigger the camera
+      digitalWriteFast(CAM_OUT, HIGH);
     }
     prevPos = pos;
     onPulse = !onPulse;
@@ -173,6 +181,7 @@ void loop() {
     previousMillis = currentMillis;
     if (onCam) {
       digitalWriteFast(CAM_PIN, LOW); // trigger the camera
+      digitalWriteFast(CAM_OUT, LOW); // trigger the camera
     }
     onPulse = !onPulse;
     }
