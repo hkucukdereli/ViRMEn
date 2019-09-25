@@ -56,7 +56,7 @@ function vr = initializationCodeFun(vr)
     vr = initializePlot(vr);
     
     % initialize the nidaq board
-    vr = initializeDAQ(vr);
+    vr = initializeDAQ(vr, 'analog');
     
     % initialize shock count depending on the experiment
     if strcmp(vr.session.experiment, 'stress')
@@ -99,10 +99,6 @@ function vr = initializationCodeFun(vr)
         
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr) 
-    vr.daq.data = [vr.daq.data, [vr.timeElapsed, vr.daq.session.inputSingleScan]];
-%     daq_data = getdata(vr.daq.in);
-%     vr.daq.data = [vr.daq.data, daq_data];
-
     % log the data
     vr = logData(vr);
     
@@ -237,12 +233,18 @@ function vr = terminationCodeFun(vr)
             % vr = stimOff(vr);
         end
     end
+    
+    if strcmp(vr.daq.daqtype, 'analog')
+        vr = terminateDAQ(vr);
+        vr = saveDAQData(vr);
+    end
+    
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
     vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
     vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
     vr.sessionData.timeout = reshape(vr.sessionData.timeout, 2, []);
     
-    daqDat = reshape(vr.daq.data, 2, []);
+    daqData = vr.daq.data;
     sessionData = vr.sessionData;
     session = vr.session;
     
