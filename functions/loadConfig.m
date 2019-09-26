@@ -22,6 +22,8 @@ function vr = loadConfig(vr)
         vr.daq.daqtype = vrconfig.daqtype;
         vr.daq.device = vrconfig.device;
         vr.daq.channels = vrconfig.channels;
+        display(vr.daq.channels);
+        display(class(vr.daq.channels));
         vr.daq.channelnames = vrconfig.channelnames;
     end
     

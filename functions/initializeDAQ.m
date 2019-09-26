@@ -7,8 +7,14 @@ function vr = initializeDAQ(vr)
         vr.state.onDAQ = true;
         
         % initialize daq data with no data
-        vr.daq.data = [];
-
+        if vr.state.onDAQ && strcmp(vr.daq.daqtype, 'counter')
+            vr.daq.data = struct('timestamp', []);
+            for j=1:length(vr.daq.channelnames)
+                ch = vr.daq.channelnames{j};
+                vr.daq.data.ch = [];
+            end
+        end
+        
         % start a daq session
         vr.daq.session = daq.createSession('ni');
         % add a channel
@@ -18,13 +24,15 @@ function vr = initializeDAQ(vr)
             vr.daq.session.resetCounters;
         elseif strcmp(vr.daq.daqtype, 'analog')
             vr.daq.in  = vr.daq.session.addAnalogInputChannel(vr.daq.device, vr.daq.channels, 'Voltage');
-            vr.daq.in.TerminalConfig = 'SingleEnded';
+            for c=1:length(vr.daq.in)
+                vr.daq.in(c).TerminalConfig = 'SingleEnded';
+            end
             
             s=[];for k=1:5,s=[s, num2str(randi(10))];end
             vr.daq.temp_path = sprintf('%s/temp_daq_data_%s.bin', vr.session.basedir, s);
             vr.daq.fid = fopen(vr.daq.temp_path,'w');
             vr.daq.lh = vr.daq.session.addlistener('DataAvailable', @(src, event)logDAQData(src, event, vr.daq.fid));
-
+            
             vr.daq.session.IsContinuous = true;
             vr.daq.session.startBackground;
         end        
