@@ -56,7 +56,7 @@ function vr = initializationCodeFun(vr)
     vr = initializePlot(vr);
     
     % initialize the nidaq board
-    vr = initializeDAQ(vr, vr.daq.daqtype);
+    vr = initializeDAQ(vr);
     
     % initialize shock count depending on the experiment
     if strcmp(vr.session.experiment, 'stress')
