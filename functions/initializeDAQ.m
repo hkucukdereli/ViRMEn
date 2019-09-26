@@ -1,6 +1,5 @@
-function vr = initializeDAQ(vr, daqtype)
+function vr = initializeDAQ(vr)
 	if vr.daq.state
-        vr.daq.daqtype = daqtype;
         % reset daq
         daqreset
         
@@ -13,12 +12,12 @@ function vr = initializeDAQ(vr, daqtype)
         % start a daq session
         vr.daq.session = daq.createSession('ni');
         % add a channel
-        if strcmp(daqtype, 'counter')
+        if strcmp(vr.daq.daqtype, 'counter')
             vr.daq.in = vr.daq.session.addCounterInputChannel(vr.daq.device, 'ctr0', 'EdgeCount');
             vr.daq.in.ActiveEdge = 'Rising';
             vr.daq.session.resetCounters;
-        elseif strcmp(daqtype, 'analog')
-            vr.daq.in  = vr.daq.session.addAnalogInputChannel(vr.daq.device, 'ai0', 'Voltage');
+        elseif strcmp(vr.daq.daqtype, 'analog')
+            vr.daq.in  = vr.daq.session.addAnalogInputChannel(vr.daq.device, vr.daq.channels, 'Voltage');
             vr.daq.in.TerminalConfig = 'SingleEnded';
             
             s=[];for k=1:5,s=[s, num2str(randi(10))];end

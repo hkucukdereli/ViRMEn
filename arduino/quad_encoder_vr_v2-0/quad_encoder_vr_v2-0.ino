@@ -4,9 +4,10 @@
 
 #define LED_PIN 13    // visual stim input from ML
 #define STIM_PIN 9   // laser trigger pin
+#define STIM_OUT 8   // copy of the laser pulses
 #define PUNISH_PIN 10  // shock trigger pin
-#define CAM_OUT 11    // caopy of the camera pulses
 #define CAM_PIN 12    // camera trigger pin
+#define CAM_OUT 11    // copy of the camera pulses
 #define LICK_PIN 6    // lick input pin
 #define REWARD_PIN 7  // reward trigger pin
 
@@ -70,6 +71,7 @@ void setup()
 {
   pinModeFast(LED_PIN, OUTPUT);
   pinModeFast(STIM_PIN, OUTPUT);
+  pinModeFast(STIM_OUT, OUTPUT);
   pinModeFast(PUNISH_PIN, OUTPUT);
   pinModeFast(REWARD_PIN, OUTPUT);
   pinModeFast(CAM_PIN, OUTPUT);
@@ -124,6 +126,7 @@ void loop() {
       if (debug) {Serial.println(msg);}
       // Terminate stimulation protocol
       digitalWriteFast(STIM_PIN, LOW);
+      digitalWriteFast(STIM_OUT, LOW);
       digitalWriteFast(LED_PIN, LOW);
       onStim = false;
       break;
@@ -132,6 +135,7 @@ void loop() {
       if (debug) {Serial.println(msg);}
       // Terminate stimulation protocol
       digitalWriteFast(STIM_PIN, LOW);
+      digitalWriteFast(STIM_OUT, LOW);
       digitalWriteFast(LED_PIN, LOW);
       onStim = false;
       break;
@@ -195,6 +199,7 @@ void loop() {
       previousTime = now();
       digitalWriteFast(LED_PIN, LOW);
       digitalWriteFast(STIM_PIN, LOW);
+      digitalWriteFast(STIM_OUT, LOW);
       onTrigger = false;
       onStimPulse = false;
       }
@@ -211,11 +216,13 @@ void loop() {
       if (onTrigger && currentMillis - triggerMillis >= stimInterval - pulseWidth) {
         triggerMillis = millis();
         digitalWriteFast(STIM_PIN, HIGH);
+        digitalWriteFast(STIM_OUT, HIGH);
         onTrigger = false;
         }
       else if (!onTrigger && currentMillis - triggerMillis >= pulseWidth) {
         triggerMillis = millis();
         digitalWriteFast(STIM_PIN, LOW);
+        digitalWriteFast(STIM_OUT, LOW);
         onTrigger = true;
         }
       }

@@ -14,8 +14,8 @@ vrconfig.input_com = 6;
 vrconfig.daq = true;
 vrconfig.daqtype = 'analog';
 vrconfig.device = 'Dev2';
-vrconfig.channelnames = {'cam'};
-vrconfig.channels = [0];
+vrconfig.channelnames = {'cam', 'stim'};
+vrconfig.channels = [0, 1];
 
 % Habituation
 vrconfig.habituationDuration = 60; % min
