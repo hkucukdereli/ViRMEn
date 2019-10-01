@@ -179,7 +179,7 @@ function vr = runtimeCodeFun(vr)
         vr = positionCheck(vr);
         
         % see if there will be another stress trial
-        if vr.timeElapsed - vr.sessionData.trialTime(end) >= vr.session.trialDuration*vr.sessionData.trialNum
+        if vr.timeElapsed - vr.sessionData.trialTime(end) >= vr.session.trialDuration*vr.sessionData.trialNum & ~(vr.sessionData.trialNum > vr.session.numTrials) 
             vr.state.onTrial = false;
             % remember which world an dposition we were
             vr.lastWorld = vr.currentWorld;
@@ -232,9 +232,11 @@ function vr = terminationCodeFun(vr)
         end
     end
     
-    if strcmp(vr.daq.daqtype, 'analog')
-        vr = terminateDAQ(vr);
-        vr = saveDAQData(vr);
+    if vr.daq.state
+        if strcmp(vr.daq.daqtype, 'analog')
+            vr = terminateDAQ(vr);
+            vr = saveDAQData(vr);
+        end
     end
     
     vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
