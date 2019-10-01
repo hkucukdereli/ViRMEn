@@ -179,7 +179,7 @@ function vr = runtimeCodeFun(vr)
         vr = positionCheck(vr);
         
         % see if there will be another stress trial
-        if vr.timeElapsed - vr.sessionData.trialTime(end) >= vr.session.trialDuration*vr.sessionData.trialNum & ~(vr.sessionData.trialNum > vr.session.numTrials) 
+        if vr.timeElapsed - vr.sessionData.trialTime(end) >= vr.session.trialDuration && vr.sessionData.trialNum <= vr.session.numTrials
             vr.state.onTrial = false;
             % remember which world an dposition we were
             vr.lastWorld = vr.currentWorld;
