@@ -5,9 +5,9 @@ function exper = createTrials(experName, templateName, varargin)
     addOptional(p, 'movement', @moveForward);
     addOptional(p, 'transformation', @transformPerspectiveMex);
     addOptional(p, 'experiment', @Trial_code);
-    addOptional(p, 'cueList', {['CueStripe45'], ['CueStripe135']});
+    addOptional(p, 'cueList', {['CueStripe90'], ['CueCheckers']});
     addOptional(p, 'grayCue', {}); 
-    addOptional(p, 'experimentType', 'trial'); 
+    addOptional(p, 'experimentType', 'trial');
     addOptional(p, 'atrandom', false);
     addOptional(p, 'nWorlds', 10);
     addOptional(p, 'overlap', 4);
