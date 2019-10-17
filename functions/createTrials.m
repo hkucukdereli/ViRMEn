@@ -35,7 +35,7 @@ function exper = createTrials(experName, templateName, varargin)
         cueList = p.cueList;
     end
 
-    if length(p.grayCue)
+    if ~isempty(p.grayCue)
         window = round(p.arenaL / (p.cueL + p.grayL));
         cueList = [p.grayCue, cueList(1), p.grayCue, cueList(2)];
     else
@@ -44,7 +44,7 @@ function exper = createTrials(experName, templateName, varargin)
     end
     
     if p.shuffle
-        if length(p.grayCue)
+        if ~isempty(p.grayCue)
             lenArr = [];
             for k=1:((p.arenaL * p.nWorlds) / (p.cueL + p.grayL)) * p.shuffle
                 grays = p.grayL + round(exprnd(p.grayL*.2, 1, p.shuffle)); 

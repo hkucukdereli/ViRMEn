@@ -30,7 +30,7 @@ function vr = loadConfig(vr)
     % trial  variables
     vr.session.numTrials = vrconfig.numTrials;
     vr.session.trialDuration = vrconfig.trialDuration * 60; % sec
-    if strcmp(vr.session.experiment, 'stress')
+    if strcmp(vr.session.experiment, 'stress') || strcmp(vr.session.experiment, 'conditioning')
         vr.session.stressDuration = vrconfig.stressDuration * 60; % sec
     else
         vr.session.stressDuration = 0;

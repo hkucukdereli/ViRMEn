@@ -1,7 +1,7 @@
-function vr = startStress(vr)   
+function vr = startStressCond(vr)   
     vr.state.onStress = true;
     
-    fprintf('Stress period starts.\n');
+    fprintf('\nStress period starts.');
     
     vr.sessionData.stressTime = [vr.sessionData.stressTime, vr.timeElapsed];
     
@@ -11,7 +11,7 @@ function vr = startStress(vr)
         vr.state.onCam = true;
     end
     % make the world visible and for trial
-    vr.currentWorld = vr.exper.userdata.nWorlds+1;
+    vr.currentWorld = findWorld(vr.exper.worlds, vr.session.cueList.gray);
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
     % initialize the position
     vr.position(2) = vr.initPos(2);
