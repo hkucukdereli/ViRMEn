@@ -35,11 +35,13 @@ function vr = initializationCodeFun(vr)
                             'shockTime', [], 'shockCount', []);
     
     % check if the right cues are used
-    cuetypes = fields(vr.session.cueList);
-    for c=1:length(cuetypes)
-        cue = vr.session.cueList.(cell2mat(cuetypes(c)));
-        if ~any(strcmp(cue, vr.exper.userdata.cuelist))
-            error('%s is not a valid cue name. Wrong cue name is given for the %s cue.\n', cue, cell2mat(cuetypes(c)));
+    if ~strcmp(vr.exper.userdata.experimentType, 'habituation')
+        cuetypes = fields(vr.session.cueList);
+        for c=1:length(cuetypes)
+            cue = vr.session.cueList.(cell2mat(cuetypes(c)));
+            if ~any(strcmp(cue, vr.exper.userdata.cuelist))
+                error('%s is not a valid cue name. Wrong cue name is given for the %s cue.\n', cue, cell2mat(cuetypes(c)));
+            end
         end
     end
     

@@ -1,7 +1,7 @@
 function code = Conditioning
-% Conditioning   Code for the ViRMEn experiment tennisCourt.
-% code = Conditioning   Returns handles to the functions that ViRMEn
-% executes during engine initialization, runtime and termination.
+% Conditioning   Code for the ViRMEn experiment Conditioning.
+%   code = Conditioning   Returns handles to the functions that ViRMEn
+%   executes during engine initialization, runtime and termination.
 
 
 % Begin header code - DO NOT EDIT
@@ -10,169 +10,292 @@ code.runtime = @runtimeCodeFun;
 code.termination = @terminationCodeFun;
 % End header code - DO NOT EDIT
 
+
+
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr)
-    vr.training = false;
-    vr.behavior = true;
-    vr.imaging = false;
-    
-    vr.session = struct('mouse', 'HK00',...
-                        'date', '190405',...
-                        'run', 2,...
-                        'rig', 'VR_training',...
-                        'experiment', 'conditioning',...
-                        'trials', 2,...
-                        'trialDuration', 10,...
-                        'blackOutDuration', 5,...
-                        'cueList', struct('stim', 'CueStripe45',...
-                                          'neutral','CueStripe135'),...
-                        'serial', false,...
-                        'com', 5,...
-                        'blackOut', false,...
-                        'inTrial', false,...
-                        'onShock', true,...
-                        'training', vr.training,...
-                        'imaging', vr.imaging);
+    vr.session = struct('mouse', 'TP00',...
+                        'date', '191017',...
+                        'run', 1,...
+                        'cueList', struct('stim', 'CueStripe90',... % stim or neutral
+                                          'neutral','CueCheckers',... % stim
+                                          'gray', 'CueGray'),...
+                        'notes', '',...
+                        'config','debug_cfg');
                     
-    vr.sessionData = struct('startTime', now(),...
-                            'position',[],...
-                            'velocity', [],...
-                            'nTrials', 0);
-                        
-    vr.trialInfo(1:vr.session.trials) = struct('trialNum', 0,...
-                                              'trialType', 0,...
-                                              'trialDuration',0,...
-                                              'stimOn', 0);
+    vr.state = struct('onWait',true, 'onKey',false, 'onCam',false, 'onCue',false,...
+                      'onStress',false, 'onPadding',false, 'onTrial',false,...
+                      'onStim',false, 'onITI',false, 'onNeutral',false, 'onHabituation',false,...
+                      'onBlackOut',false, 'onPlot',false, 'onDAQ',false);
 
-    if vr.session.serial
-        serialFix;
-        vr = initializationForSerial(vr, vr.session.com);
-    end
-                              
-    vr.trialDuration = [vr.session.trialDuration];
-    vr.nTrials = 0;
+    vr.sessionData = struct('startTime', 0, 'endTime', 0, 'trialNum', 0, 'cueNum',0,...
+                        'trialTime', [], 'stressTime', [],...
+                        'position',[], 'velocity', [], 'timestamp', [],...
+                        'stimon', [], 'stimoff', [], 'ition', [],...
+                        'timeout',[], 'cuetype',[], 'cueid', [],...
+                        'shockTime', [], 'shockCount', [], 'transitionTime', 0);
+    
+    vr.session.cuetime = 1;
+    vr.session.transitiontime = 2;
+    
+    if rand >= 0.5
+        vr.cueOrder = {vr.session.cueList.stim, vr.session.cueList.neutral};
+    else
+        vr.cueOrder = {vr.session.cueList.neutral, vr.session.cueList.stim};
+    end 
+    
+    % load the variables from the config file
+    vr = loadConfig(vr);
+    
+    % initilize save
+    vr = initializeSave(vr);
+    
+    % initialize the serial
+    vr = initializationForSerial(vr);
+    
+    % initialize plotting window
+    vr = initializePlot(vr);
+    
+    % initialize the nidaq board
+    vr = initializeDAQ(vr);
+    
+    % set the shock times
+    vr.shockCount = 1;
+    vr = initializeShocks(vr);
+    
+    vr.startTime = 0;
+    vr.endTime = 0;
+    % vr.stressTime = 0;
+    vr.paddingTime = 0;
+    vr.stimTime = 0;
+    
+    vr.cueid = 0;
+    vr.paddingCount = 0;
+    
+    vr.initPos = vr.worlds{vr.currentWorld}.startLocation;
     vr.lastPos = 0;
+    vr.lastWorldPos = vr.initPos(2);
+    % initialize the waiting period
+    vr.lastWorld = findWorld(vr.exper.worlds, vr.session.cueList.gray);
+    % vr.lastWorld = vr.currentWorld;
     
+    % set the current world to the shock context
+    vr.currentWorld = findWorld(vr.exper.worlds, vr.session.cueList.gray);
+
     vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
-    
     vr.waitOn = true;
-    vr.previousTime = vr.timeElapsed;
     
-    fprintf('Press spacebar to start the experiment.\n');
-    
+    fprintf(['Press S to test the shock during the waiting period.\n',...
+             'Press spacebar to start the experiment.\n']);
+
+
+
 % --- RUNTIME code: executes on every iteration of the ViRMEn engine.
 function vr = runtimeCodeFun(vr)
-
-    % Press space to start
-    if vr.waitOn & vr.keyPressed == 32
-        vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
-        vr.session.inTrial = true;
-        vr.session.blackOut = false;
-        vr.waitOn = false;
-        vr.previousTime = vr.timeElapsed;
-        
-        % initialize the trial count
-        vr.sessionData.nTrials = 1;
-        vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
-        vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.session.trialDuration;
-        
-        % check the first cue to see if stim needs to be on
-        % turn on/off the stim
-        if vr.session.serial
-            if ~vr.session.blackOut & vr.session.inTrial & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
-                arduinoWriteMsg(vr.arduino_serial, 'S');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
-            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
-                arduinoWriteMsg(vr.arduino_serial, 'O');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
-            end
-        end
-    end
-
-    if vr.session.blackOut == false & vr.session.inTrial == true & (vr.timeElapsed - vr.previousTime) > vr.trialDuration
-        % change the world to the next one and teleport to the start
-        vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
-        % change states
-        vr.session.blackOut = true;
-        vr.session.inTrial = false;
-        
-        % turn off the stim during blackout
-        if vr.session.serial
-            if vr.session.blackOut | any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
-                arduinoWriteMsg(vr.arduino_serial, 'O');
-            end
-        end
-        
-        % timestamp
-        vr.previousTime = vr.timeElapsed;
-    end
+    % log the data
+    vr = logData(vr);
     
-    if vr.session.blackOut == true & vr.session.inTrial ==false & (vr.timeElapsed - vr.previousTime) > vr.session.blackOutDuration
-        % start a new trial %
-        % make the world visible
-        vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
-        % change states
-        vr.session.blackOut = false;
-        vr.session.inTrial = true;
-        % timestamp
-        vr.previousTime = vr.timeElapsed;
-        
-        % change the world to the next one and teleport to the start
-        vr.currentWorld = mod(vr.currentWorld, length(vr.exper.worlds)) + 1;
-        initPos = vr.worlds{vr.currentWorld}.startLocation;
-        vr.position(2) = initPos(2); % set the animal’s y position to 0
-        vr.dp(:) = 0; % prevent any additional movement during teleportation
-        
-        % advance the trial number
-        vr.sessionData.nTrials = vr.sessionData.nTrials + 1;
-        vr.trialInfo(vr.sessionData.nTrials).trialNum = vr.sessionData.nTrials;
-        % set the next trial duration
-        vr.trialDuration = [vr.trialDuration, vr.trialDuration];
-        vr.trialInfo(vr.sessionData.nTrials).trialDuration = vr.trialDuration(vr.sessionData.nTrials);
-        
-        % turn on/off the stim
-        if vr.session.serial
-            if ~vr.session.blackOut & any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('stim')))
-                arduinoWriteMsg(vr.arduino_serial, 'S');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 1;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'stim';
-            elseif any(strcmp(fieldnames(vr.worlds{vr.currentWorld}.objects.indices), vr.session.cueList.('neutral')))
-                arduinoWriteMsg(vr.arduino_serial, 'O');
-                vr.trialInfo(vr.sessionData.nTrials).stimOn = 0;
-                vr.trialInfo(vr.sessionData.nTrials).trialType = 'neutral';
+    % wait starts
+    if vr.state.onWait
+        vr.position(2) = vr.initPos(2);
+        % send out shocks if 'S' key is pressed
+        if (vr.keyPressed == 83 || vr.keyPressed == 115)
+            arduinoWriteMsg(vr.arduino_serial, 'PP');
+        end
+    end
+    if vr.state.onWait && vr.keyPressed == 32
+        % end wait and move to padding block
+        vr.state.onWait = false;
+        vr = startStressCond(vr);
+        vr.lastPos = vr.lastPos + vr.position(2);
+        vr.sessionData.trialNum = vr.sessionData.trialNum + 1; % add to the trial number
+        vr.startTime = vr.timeElapsed;
+        vr.sessionData.startTime = vr.timeElapsed;
+    end
+    % wait block ends
+    
+    
+    % stress starts
+    if vr.state.onStress
+        vr.lastPos = vr.lastPos + vr.position(2);
+        vr = teleportCheck(vr); % keep the mouse in the iti zone as long as the stress is on
+        % deliver shocks when necessary
+        if vr.shockCount < length(vr.sessionData.stressShocks{vr.sessionData.trialNum}) && vr.timeElapsed - vr.sessionData.stressTime(end) > vr.sessionData.stressShocks{vr.sessionData.trialNum}(vr.shockCount)
+            vr = badMouse(vr);
+        end
+        if vr.timeElapsed - vr.sessionData.stressTime(end) >= vr.session.stressDuration
+            % end stress and move to trial block
+            vr.state.onStress = false;
+            vr.state.onTrial = 1;
+            vr.shockCount = 1; % reset the shock count
+            
+            % Start the trial with a gray cue
+            fprintf(' \nEntering iti zone.');
+            vr.state.onITI = 1;
+            vr.lastTime = vr.timeElapsed;
+            % make the world visible and for trial
+            vr.currentWorld = findWorld(vr.exper.worlds, vr.session.cueList.gray);
+            vr.worlds{vr.currentWorld}.surface.visible(1,:) = 1;
+            % initialize the position
+            vr.position(2) = vr.initPos(2);
+            vr.dp(:) = 0; % prevent any additional movement during teleportation
+            % iti on
+            vr.sessionData.ition = [vr.sessionData.ition, [vr.timeElapsed; vr.position(2) + vr.lastPos]];
+            vr.sessionData.cuetype = [vr.sessionData.cuetype, {vr.session.cueList.gray}];
+            if vr.session.serial, arduinoWriteMsg(vr.arduino_serial, 'O'); end
+        end
+    end
+    % stress ends
+    
+    % trial starts
+    if vr.state.onTrial
+        % 1. iti %
+        %%%%%%%%%%
+        if vr.state.onITI == 1
+            vr.lastPos = vr.lastPos + vr.position(2);
+            vr = teleportCheck(vr);
+
+            if vr.timeElapsed - vr.lastTime >= vr.session.cuetime
+                vr.state.onITI = 2;
+                vr.lastTime = vr.timeElapsed;
+                
+                % new iti sets the next cue as well as transitions
+                vr.sessionData.cueNum = vr.sessionData.cueNum + 1; % add to the cue count
+                vr.currentWorld = findWorld(vr.exper.worlds, vr.cueOrder{1+mod(vr.sessionData.cueNum,2)}) - 1;
+                vr.position(2) = vr.worlds{vr.currentWorld}.startLocation(2); % set the animal’s initial y positino
+                vr.dp(:) = 0; % prevent any additional movement during teleportation
             end
         end
-        
-        % reset the last position
-        vr.lastPos = 0;
-    end
+        %%%
 
-    vr = teleportCheck(vr);
+        % 2. iti to cue %
+        %%%%%%%%%%%%%%%%%
+        if vr.state.onITI == 2
+            vr.lastPos = vr.lastPos + vr.position(2);
+            vr = teleportCheck(vr); % change this
+
+            if vr.timeElapsed - vr.lastTime >= vr.session.transitiontime
+                vr.state.onITI = 0;
+                vr.state.onCue = 1;
+                vr.lastTime = vr.timeElapsed;
+                
+                % entering the cue
+                vr.currentWorld = findWorld(vr.exper.worlds, vr.cueOrder{1+mod(vr.sessionData.cueNum,2)});
+                vr.position(2) = vr.worlds{vr.currentWorld}.startLocation(2); % set the animal’s initial y positino
+                vr.dp(:) = 0; % prevent any additional movement during teleportation
+                vr = stimOnOff(vr);
+            end
+        end
+        %%%
+
+        % 3. cue %
+        %%%%%%%%%%
+        if vr.state.onCue == 1
+            vr.lastPos = vr.lastPos + vr.position(2);
+            vr = teleportCheck(vr);
+
+            if vr.timeElapsed - vr.lastTime >= vr.session.cuetime
+                vr.state.onCue = 2;
+                vr.lastTime = vr.timeElapsed;
+                
+                vr.currentWorld = findWorld(vr.exper.worlds, vr.cueOrder{1+mod(vr.sessionData.cueNum,2)}) + 1;
+                vr.position(2) = vr.worlds{vr.currentWorld}.startLocation(2); % set the animal’s initial y positino
+                vr.dp(:) = 0; % prevent any additional movement during teleportation
+            end
+        end
+        %%%
+
+        % 4. cue to iti %
+        %%%%%%%%%%%%%%%%%
+        if vr.state.onCue == 2
+            vr.lastPos = vr.lastPos + vr.position(2);
+            vr = teleportCheck(vr); % change this
+
+            if vr.timeElapsed - vr.lastTime >= vr.session.transitiontime
+                vr.state.onCue = 0;
+                vr.state.onITI = 1;
+                vr.lastTime = vr.timeElapsed;
+                
+                % entering the iti
+                vr.currentWorld = findWorld(vr.exper.worlds, vr.session.cueList.gray);
+                vr.position(2) = vr.worlds{vr.currentWorld}.startLocation(2); % set the animal’s initial y positino
+                vr.dp(:) = 0; % prevent any additional movement during teleportation
+                fprintf(" \nEntering the iti zone.");
+            end
+            
+            % decide what to do upon reaching the next iti 
+            if vr.sessionData.cueNum >= 4*vr.sessionData.trialNum && vr.state.onCue == 2 && ~vr.state.onITI
+                % proceed to the next stress period
+                vr.state.onCue = false;
+                vr.state.onITI = false;
+                vr.state.onTrial = false;
+                vr.state.onStress = true;
+                if vr.sessionData.trialNum >= vr.session.numTrials
+                    % terminate the experiment
+                    vr.state.onTrial = false;
+                    vr.worlds{vr.currentWorld}.surface.visible(1,:) = 0;
+                    if vr.session.serial
+                        arduinoWriteMsg(vr.arduino_serial, 'O'); % terminate stim in case it was left on for whatever reason
+                        arduinoWriteMsg(vr.arduino_serial, 'C'); % disbale cam pulsing
+                    end
+                    vr.endTime = vr.timeElapsed;
+                    vr.sessionData.endTime = vr.timeElapsed;
+                    vr.experimentEnded = true;
+                else
+                    vr = startStressCond(vr);
+                    vr.sessionData.trialNum = vr.sessionData.trialNum + 1; % add to the trial number
+                end
+            end
+            
+        end
+        %%%
     
-    vr.sessionData.position = [vr.sessionData.position, vr.position(2) + vr.lastPos];
-    vr.sessionData.velocity = [vr.sessionData.velocity, vr.velocity(2)];
-
-    if vr.sessionData.nTrials > vr.session.trials
-        vr = terminationCodeFun(vr);
     end
+    % trial ends
+
+
 
 % --- TERMINATION code: executes after the ViRMEn engine stops.
 function vr = terminationCodeFun(vr)
-    % turn off the stim before termination 
-    arduinoWriteMsg(vr.arduino_serial, 'O');
+    % log the time in case the user escaped
+    if ~vr.endTime && vr.sessionData.startTime
+        vr.sessionData.endTime = vr.timeElapsed;
+        if ~strcmp(vr.session.experiment, 'habituation')
+            % turn the stim off in case the user escaped and log it
+            % vr = stimOff(vr);
+        end
+    end
     
-    vr.sessionData.trialDuration = vr.trialDuration;
+    vr.sessionData.cueid = [1:length(vr.sessionData.cuetype)];
     
-%     assignin('base', 'sessionData', vr.sessionData);
-%     assignin('base', 'trialInfo', vr.trialInfo);
-%     assignin('base', 'vr', vr);
-
+    if vr.daq.state
+        if strcmp(vr.daq.daqtype, 'analog')
+            vr = terminateDAQ(vr);
+            vr = saveDAQData(vr);
+        end
+    end
+    
+    vr.sessionData.stimoff = reshape(vr.sessionData.stimoff, 2, []);
+    vr.sessionData.stimon = reshape(vr.sessionData.stimon, 2, []);
+    vr.sessionData.ition = reshape(vr.sessionData.ition, 2, []);
+    vr.sessionData.timeout = reshape(vr.sessionData.timeout, 2, []);
+    
+    daqData = vr.daq.data;
     sessionData = vr.sessionData;
-    trialInfo = vr.trialInfo;
-    save(sprintf('data/%s_%s_%i_%s.mat', vr.session.mouse, vr.session.date, vr.session.run, vr.session.experiment),...
-        'sessionData', 'trialInfo');
+    session = vr.session;
+    
+    if vr.session.save
+        if vr.daq.state
+            save(vr.savepath, 'session', 'sessionData', 'daqData');
+        else
+            save(vr.savepath, 'session', 'sessionData');
+        end
+    end
+    
     if vr.session.serial
+        arduinoWriteMsg(vr.arduino_serial, 'O'); % terminate stim in case it was left on for whatever reason
+        arduinoWriteMsg(vr.arduino_serial, 'C'); % disbale cam pulsing
         terminationForSerial(vr);
     end
+
+
