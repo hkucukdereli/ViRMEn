@@ -15,7 +15,7 @@ code.termination = @terminationCodeFun;
 % --- INITIALIZATION code: executes before the ViRMEn engine starts.
 function vr = initializationCodeFun(vr)
     vr.session = struct('mouse', 'TP00',...
-                        'date', '191017',...
+                        'date', '191018',...
                         'run', 1,...
                         'cueList', struct('stim', 'CueStripe90',... % stim or neutral
                                           'neutral','CueCheckers',... % stim
@@ -33,10 +33,10 @@ function vr = initializationCodeFun(vr)
                         'position',[], 'velocity', [], 'timestamp', [],...
                         'stimon', [], 'stimoff', [], 'ition', [],...
                         'timeout',[], 'cuetype',[], 'cueid', [],...
-                        'shockTime', [], 'shockCount', [], 'transitionTime', 0);
+                        'shockTime', [], 'shockCount', []);
     
-    vr.session.cuetime = 1;
-    vr.session.transitiontime = 2;
+    vr.session.cuetime = 20;
+    vr.session.transitiontime = 60;
     
     if rand >= 0.5
         vr.cueOrder = {vr.session.cueList.stim, vr.session.cueList.neutral};
@@ -114,7 +114,6 @@ function vr = runtimeCodeFun(vr)
     end
     % wait block ends
     
-    
     % stress starts
     if vr.state.onStress
         vr.lastPos = vr.lastPos + vr.position(2);
@@ -172,9 +171,8 @@ function vr = runtimeCodeFun(vr)
         %%%%%%%%%%%%%%%%%
         if vr.state.onITI == 2
             vr.lastPos = vr.lastPos + vr.position(2);
-            vr = teleportCheck(vr); % change this
 
-            if vr.timeElapsed - vr.lastTime >= vr.session.transitiontime
+            if vr.timeElapsed - vr.lastTime >= vr.session.transitiontime || vr.position(2) >= str2num(vr.exper.variables.arenaL) / 4
                 vr.state.onITI = 0;
                 vr.state.onCue = 1;
                 vr.lastTime = vr.timeElapsed;
@@ -209,9 +207,8 @@ function vr = runtimeCodeFun(vr)
         %%%%%%%%%%%%%%%%%
         if vr.state.onCue == 2
             vr.lastPos = vr.lastPos + vr.position(2);
-            vr = teleportCheck(vr); % change this
 
-            if vr.timeElapsed - vr.lastTime >= vr.session.transitiontime
+            if vr.timeElapsed - vr.lastTime >= vr.session.transitiontime || vr.position(2) >= str2num(vr.exper.variables.arenaL) / 4
                 vr.state.onCue = 0;
                 vr.state.onITI = 1;
                 vr.lastTime = vr.timeElapsed;
